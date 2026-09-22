@@ -1,0 +1,1433 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asistencia - Colegio San Pedro</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        sanpedro: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            600: '#1e40af',
+                            700: '#1d4ed8',
+                            800: '#1e3a8a',
+                            900: '#0f172a'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="h-full flex flex-col text-slate-800 antialiased">
+
+    <!-- Encabezado Principal -->
+    <header class="bg-gradient-to-r from-sanpedro-900 via-sanpedro-800 to-indigo-900 text-white shadow-lg sticky top-0 z-30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            
+            <!-- Identidad de la Institución -->
+            <div class="flex items-center space-x-3">
+                <div class="bg-white/10 p-2.5 rounded-xl backdrop-blur-md border border-white/20 shadow-inner">
+                    <svg class="w-8 h-8 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-white">Colegio "San Pedro"</h1>
+                    <p class="text-xs text-indigo-200 font-medium">Sistema de Registro y Reporte de Asistencia Diaria</p>
+                </div>
+            </div>
+
+            <!-- Reloj del Sistema -->
+            <div class="flex items-center justify-between md:justify-end bg-white/10 rounded-xl px-4 py-2 border border-white/10 backdrop-blur-sm shadow-sm">
+                <div class="flex items-center space-x-2 text-amber-300">
+                    <svg class="w-5 h-5 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span class="text-xs font-medium uppercase tracking-wider text-indigo-200">Hora del Sistema:</span>
+                </div>
+                <div id="liveClock" class="text-lg font-mono font-bold tracking-wider text-white ml-3">00:00:00 AM</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Layout Principal -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+        <!-- Barra de Configuración de Web App URL y Navegación de Pestañas -->
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80 flex flex-col md:flex-row items-center justify-between gap-4">
+            <!-- Pestañas de Sección -->
+            <div class="flex space-x-2 w-full md:w-auto">
+                <button id="tabRegisterBtn" onclick="switchTab('register')" class="flex-1 md:flex-none inline-flex items-center justify-center px-5 py-2.5 rounded-xl font-medium text-sm transition-all shadow-sm bg-sanpedro-700 text-white hover:bg-sanpedro-800">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Tomar Asistencia
+                </button>
+                <button id="tabReportBtn" onclick="switchTab('report')" class="flex-1 md:flex-none inline-flex items-center justify-center px-5 py-2.5 rounded-xl font-medium text-sm transition-all text-slate-600 hover:bg-slate-100">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                    Reporte e Histórico
+                </button>
+            </div>
+
+            <!-- Ajustes de Conexión (Apps Script URL) -->
+            <div class="w-full md:w-auto flex items-center space-x-2 bg-slate-100 p-1.5 rounded-xl text-xs text-slate-600">
+                <span class="font-medium px-2 hidden sm:inline">Google Script URL:</span>
+                <input id="scriptUrlInput" type="text" placeholder="Pegar URL del Web App (doPost)" class="px-3 py-1.5 rounded-lg border border-slate-300 w-full sm:w-64 text-xs focus:ring-2 focus:ring-sanpedro-700 focus:outline-none">
+                <button onclick="saveScriptUrl()" class="px-3 py-1.5 bg-slate-800 text-white font-medium rounded-lg hover:bg-slate-900 transition-colors">Guardar</button>
+            </div>
+        </div>
+
+        <!-- PESTAÑA 1: REGISTRO DE ASISTENCIA -->
+        <section id="registerTab" class="space-y-6">
+            
+            <!-- Panel de Filtros y Selección -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80">
+                <h2 class="text-base font-semibold text-slate-900 mb-4 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-sanpedro-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.447.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z"></path></svg>
+                    Parámetros de Registro
+                </h2>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                    <!-- Selector de Grado -->
+                    <div>
+                        <label for="selectGrado" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-2">Grado</label>
+                        <select id="selectGrado" onchange="renderAttendanceTable()" class="w-full bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-xl focus:ring-2 focus:ring-sanpedro-700 focus:border-sanpedro-700 block p-3 transition-all font-medium">
+                            <option value="1">1° Grado de Secundaria</option>
+                            <option value="2">2° Grado de Secundaria</option>
+                            <option value="3">3° Grado de Secundaria</option>
+                            <option value="4">4° Grado de Secundaria</option>
+                            <option value="5">5° Grado de Secundaria</option>
+                        </select>
+                    </div>
+
+                    <!-- Selector de Sección -->
+                    <div>
+                        <label for="selectSeccion" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-2">Sección</label>
+                        <select id="selectSeccion" onchange="renderAttendanceTable()" class="w-full bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-xl focus:ring-2 focus:ring-sanpedro-700 focus:border-sanpedro-700 block p-3 transition-all font-medium">
+                            <option value="A">Sección A</option>
+                            <option value="B">Sección B</option>
+                            <option value="C">Sección C</option>
+                            <option value="D">Sección D</option>
+                        </select>
+                    </div>
+
+                    <!-- Campo de Fecha -->
+                    <div>
+                        <label for="inputFecha" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-2">Fecha de Registro</label>
+                        <input type="date" id="inputFecha" class="w-full bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-xl focus:ring-2 focus:ring-sanpedro-700 focus:border-sanpedro-700 block p-3 transition-all font-medium">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Barra de Acciones Rápidas y Métricas en Tiempo Real -->
+            <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 bg-white p-4 rounded-2xl shadow-sm border border-slate-200/80">
+                <!-- Contadores dinámicos -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center w-full md:w-auto">
+                    <div class="bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-xl">
+                        <span class="text-xs text-emerald-700 font-semibold uppercase block">Presentes</span>
+                        <span id="counterPresente" class="text-base font-bold text-emerald-800">0</span>
+                    </div>
+                    <div class="bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-xl">
+                        <span class="text-xs text-amber-700 font-semibold uppercase block">Tardanzas</span>
+                        <span id="counterTardanza" class="text-base font-bold text-amber-800">0</span>
+                    </div>
+                    <div class="bg-rose-50 border border-rose-200 px-3 py-1.5 rounded-xl">
+                        <span class="text-xs text-rose-700 font-semibold uppercase block">Faltas</span>
+                        <span id="counterFalta" class="text-base font-bold text-rose-800">0</span>
+                    </div>
+                    <div class="bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-xl">
+                        <span class="text-xs text-blue-700 font-semibold uppercase block">Justificados</span>
+                        <span id="counterJustificado" class="text-base font-bold text-blue-800">0</span>
+                    </div>
+                </div>
+
+                <!-- Botones de Acción Global -->
+                <div class="flex items-center space-x-2 self-end md:self-auto">
+                    <button type="button" onclick="setBulkStatus('Presente')" class="px-3 py-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-xs font-semibold rounded-xl transition-colors flex items-center">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        Marcar Todos Presentes
+                    </button>
+                    <button type="button" onclick="setBulkStatus('Falta')" class="px-3 py-2 bg-rose-100 hover:bg-rose-200 text-rose-800 text-xs font-semibold rounded-xl transition-colors flex items-center">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        Marcar Todos Falta
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tabla Estudiantil Dinámica -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-100/80 border-b border-slate-200 text-slate-700 text-xs uppercase font-bold tracking-wider">
+                                <th class="py-4 px-6 w-16 text-center">#</th>
+                                <th class="py-4 px-6">Apellidos y Nombres</th>
+                                <th class="py-4 px-6 text-center w-80">Estado de Asistencia</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentTableBody" class="divide-y divide-slate-200/70 text-sm">
+                            <!-- Los alumnos se insertan dinámicamente desde JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Mensaje de Tabla Vacía -->
+                <div id="emptyTableState" class="hidden p-8 text-center text-slate-500">
+                    <svg class="w-12 h-12 mx-auto text-slate-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
+                    <p class="font-medium">No se encontraron estudiantes para el Grado y Sección seleccionados.</p>
+                </div>
+            </div>
+
+            <!-- Botón Principal de Envío -->
+            <div class="pt-2">
+                <button id="saveBtn" onclick="submitAttendance()" class="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-sanpedro-700 to-indigo-700 hover:from-sanpedro-800 hover:to-indigo-800 text-white font-bold text-base rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center mx-auto space-x-2">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
+                    <span>Guardar Asistencia en Google Sheets</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- PESTAÑA 2: REPORTE DE ESTADO DE ESTUDIANTES -->
+        <section id="reportTab" class="hidden space-y-6">
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-900">Reporte Resumen de Estudiantes</h2>
+                        <p class="text-xs text-slate-500">Estado consolidado de la toma de asistencia activa</p>
+                    </div>
+                    <button onclick="exportToCSV()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition-colors flex items-center">
+                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        Exportar Reporte (CSV)
+                    </button>
+                </div>
+
+                <!-- Tarjetas Estadísticas -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                    <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                        <div>
+                            <p class="text-xs text-slate-500 font-medium">Total Matriculados</p>
+                            <p id="reportTotal" class="text-2xl font-black text-slate-800">0</p>
+                        </div>
+                        <div class="p-3 bg-slate-200 text-slate-700 rounded-lg">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                        </div>
+                    </div>
+
+                    <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-between">
+                        <div>
+                            <p class="text-xs text-emerald-700 font-medium">% Asistencia Efectiva</p>
+                            <p id="reportPercentage" class="text-2xl font-black text-emerald-700">0%</p>
+                        </div>
+                        <div class="p-3 bg-emerald-100 text-emerald-800 rounded-lg">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                    </div>
+
+                    <div class="p-4 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-between">
+                        <div>
+                            <p class="text-xs text-amber-700 font-medium">Tardanzas Totales</p>
+                            <p id="reportTardanza" class="text-2xl font-black text-amber-700">0</p>
+                        </div>
+                        <div class="p-3 bg-amber-100 text-amber-800 rounded-lg">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                    </div>
+
+                    <div class="p-4 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-between">
+                        <div>
+                            <p class="text-xs text-rose-700 font-medium">Inasistencias No Justif.</p>
+                            <p id="reportFalta" class="text-2xl font-black text-rose-700">0</p>
+                        </div>
+                        <div class="p-3 bg-rose-100 text-rose-800 rounded-lg">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 items-center bg-slate-50/80 p-5 rounded-2xl border border-slate-200">
+                    <div class="lg:col-span-1 flex flex-col items-center justify-center relative min-h-[200px]">
+                        <canvas id="attendanceChart" class="max-h-52 max-w-xs"></canvas>
+                    </div>
+                    <div class="lg:col-span-2 space-y-3">
+                        <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Distribución Porcentual y Totales</h3>
+                        <div id="chartPercentageList" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <!-- Inyectado dinámicamente con JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detalle Filtrado por Estado -->
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-sm font-semibold text-slate-800 uppercase tracking-wider">Desglose Detallado</h3>
+                        <div class="flex space-x-1">
+                            <button onclick="filterReport('TODOS')" class="px-2.5 py-1 text-xs font-medium rounded-lg bg-slate-800 text-white">Todos</button>
+                            <button onclick="filterReport('Presente')" class="px-2.5 py-1 text-xs font-medium rounded-lg bg-emerald-100 text-emerald-800">Presentes</button>
+                            <button onclick="filterReport('Tardanza')" class="px-2.5 py-1 text-xs font-medium rounded-lg bg-amber-100 text-amber-800">Tardanzas</button>
+                            <button onclick="filterReport('Falta')" class="px-2.5 py-1 text-xs font-medium rounded-lg bg-rose-100 text-rose-800">Faltas</button>
+                            <button onclick="filterReport('Justificado')" class="px-2.5 py-1 text-xs font-medium rounded-lg bg-blue-100 text-blue-800">Justificados</button>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto border border-slate-200 rounded-xl">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 uppercase font-semibold">
+                                <tr>
+                                    <th class="py-3 px-4">Estudiante</th>
+                                    <th class="py-3 px-4">Grado y Sección</th>
+                                    <th class="py-3 px-4">Estado Actual</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reportTableBody" class="divide-y divide-slate-200">
+                                <!-- Filas de reporte dinámicas -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal Personalizado para Notificaciones -->
+    <div id="statusModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 text-center space-y-4">
+            <div id="modalIconContainer" class="w-16 h-16 mx-auto rounded-full flex items-center justify-center">
+                <!-- Icono dinámico -->
+            </div>
+            <h3 id="modalTitle" class="text-xl font-bold text-slate-900"></h3>
+            <p id="modalMessage" class="text-sm text-slate-600"></p>
+            <button onclick="closeModal()" class="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm rounded-xl transition-all">
+                Entendido
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // BASE DE DATOS FICTICIA DE ESTUDIANTES
+        // ==========================================
+        const estudiantesBD = [
+            // 1° Grado - Sección A
+            { id: 0001, apellidos_nombres: "Aguilar Lopez, Gareth Kreyg", grado: "1", seccion: "A" },
+            { id: 0002, apellidos_nombres: "Agurto Chavez, Dayron Leonel", grado: "1", seccion: "A" },
+            { id: 0003, apellidos_nombres: "Arica Melgar, Fredy Johau", grado: "1", seccion: "A" },
+            { id: 0004, apellidos_nombres: "Arismendis Pimentel, Yulianna Valentina", grado: "1", seccion: "A" },
+            { id: 0005, apellidos_nombres: "Boza Yarleque, Enrique Paolo", grado: "1", seccion: "A" },
+            { id: 0006, apellidos_nombres: "Castillo Andrade, Fabiano Jesús", grado: "1", seccion: "A" },
+            { id: 0007, apellidos_nombres: "Chiroque Alzamora, Anyela Krisbell", grado: "1", seccion: "A" },
+            { id: 0008, apellidos_nombres: "Cordova Lopez, Yasmin Alexandra", grado: "1", seccion: "A" },
+            { id: 0009, apellidos_nombres: "Cruz Cordova, Victoria Maite", grado: "1", seccion: "A" },
+            { id: 0010, apellidos_nombres: "Floriano Sanchez, Lionel Sebastian", grado: "1", seccion: "A" },
+            { id: 0011, apellidos_nombres: "Frias Nole, Evans Said", grado: "1", seccion: "A" },
+            { id: 0012, apellidos_nombres: "Gamarra Estrada, Martha Sofia", grado: "1", seccion: "A" },
+            { id: 0013, apellidos_nombres: "Garcia Garcia, Cataleya Alohana", grado: "1", seccion: "A" },
+            { id: 0014, apellidos_nombres: "Giron Alvarez, John Kelvin", grado: "1", seccion: "A" },
+            { id: 0015, apellidos_nombres: "Huaman Crisanto, Esteban Felipe", grado: "1", seccion: "A" },
+            { id: 0016, apellidos_nombres: "Huaman Pimentel, Stephano Yarhiel", grado: "1", seccion: "A" },
+            { id: 0017, apellidos_nombres: "Ipanaque Gonza, Thiago Daniel", grado: "1", seccion: "A" },
+            { id: 0018, apellidos_nombres: "Moreno La Barrera, José Gabriel Pablo", grado: "1", seccion: "A" },
+            { id: 0019, apellidos_nombres: "Muñoz Vega, Kristell Gabriela", grado: "1", seccion: "A" },
+            { id: 0020, apellidos_nombres: "Nuñez Vite, Everson Gabriel", grado: "1", seccion: "A" },
+            { id: 0021, apellidos_nombres: "Olivares Palacios, Alesjhafe Leonela", grado: "1", seccion: "A" },
+            { id: 0022, apellidos_nombres: "Peña Saavedra, Patrik Del Piero", grado: "1", seccion: "A" },
+            { id: 0023, apellidos_nombres: "Prado Litano, Pricila Noemi", grado: "1", seccion: "A" },
+            { id: 0024, apellidos_nombres: "Rafael Rodriguez, Cristian Eduardo", grado: "1", seccion: "A" },
+            { id: 0025, apellidos_nombres: "Ramirez Aguilera, Ariana Nicole", grado: "1", seccion: "A" },
+            { id: 0026, apellidos_nombres: "Santos Gallo, Jeanpaul Aldair", grado: "1", seccion: "A" },
+            { id: 0027, apellidos_nombres: "Sarango Chunga, Deyanira Nikol", grado: "1", seccion: "A" },
+            { id: 0028, apellidos_nombres: "Siesquen Lozada, Ricardo Caleb", grado: "1", seccion: "A" },
+            { id: 0029, apellidos_nombres: "Valle Castillo, Giberth Mateo", grado: "1", seccion: "A" },
+            { id: 0030, apellidos_nombres: "Velasquez Huaman, Mercedes Yamila", grado: "1", seccion: "A" },
+            { id: 0031, apellidos_nombres: "Yahuarcani Neira, Renzo Alexander", grado: "1", seccion: "A" },
+            { id: 0032, apellidos_nombres: "Yaso Gil, Vinyenson", grado: "1", seccion: "A" },
+            { id: 0033, apellidos_nombres: "Ybañez Castillo, Mel Naómy", grado: "1", seccion: "A" },
+            { id: 0034, apellidos_nombres: "Zapata Pizarro, Alejandro Moises", grado: "1", seccion: "A" },
+
+            // 1° Grado - Sección B
+            { id: 0035, apellidos_nombres: "Alama Ipanaque, Adriano Gianpiero", grado: "1", seccion: "B" },
+            { id: 0036, apellidos_nombres: "Alberca Monja, James Farid", grado: "1", seccion: "B" },
+            { id: 0037, apellidos_nombres: "Aponte Juarez, Elias Adriel", grado: "1", seccion: "B" },
+            { id: 0038, apellidos_nombres: "Baltazar Santos, Dairon Josué", grado: "1", seccion: "B" },
+            { id: 0039, apellidos_nombres: "Bayona Alegria, Luana Jannely", grado: "1", seccion: "B" },
+            { id: 0040, apellidos_nombres: "Campoverde La Serna, Eduardo Yamir", grado: "1", seccion: "B" },
+            { id: 0041, apellidos_nombres: "Cordova Sondor, Alejandra Majalahaxia", grado: "1", seccion: "B" },
+            { id: 0042, apellidos_nombres: "Cruz Abad, Alexis Aldair", grado: "1", seccion: "B" },
+            { id: 0043, apellidos_nombres: "Cunya Juarez, Milett Antonella", grado: "1", seccion: "B" },
+            { id: 0044, apellidos_nombres: "Cunya Pangalima, Isumi Mareyli", grado: "1", seccion: "B" },
+            { id: 0045, apellidos_nombres: "Garcia Carhuachinchay, Ashly Nicol", grado: "1", seccion: "B" },
+            { id: 0046, apellidos_nombres: "Garcia Huaman, Maryuri Melizza Abigail", grado: "1", seccion: "B" },
+            { id: 0047, apellidos_nombres: "Gomez Mogollon, Eswin Jose", grado: "1", seccion: "B" },
+            { id: 0048, apellidos_nombres: "Huancas Santiago, Leonel Agusto", grado: "1", seccion: "B" },
+            { id: 0049, apellidos_nombres: "Ibañez Garcia, Melqui David", grado: "1", seccion: "B" },
+            { id: 0050, apellidos_nombres: "Jara Chinguel, Liam Fabricio", grado: "1", seccion: "B" },
+            { id: 0051, apellidos_nombres: "Lozada Cordova, Jhon Mathias", grado: "1", seccion: "B" },
+            { id: 0052, apellidos_nombres: "Marchan Rivera, Angie Alessandra", grado: "1", seccion: "B" },
+            { id: 0053, apellidos_nombres: "Neira Gomez, Dulce Belen", grado: "1", seccion: "B" },
+            { id: 0054, apellidos_nombres: "Nunura Chira, Jhonatan Smith", grado: "1", seccion: "B" },
+            { id: 0055, apellidos_nombres: "Peña Martinez, Adrian Enrique", grado: "1", seccion: "B" },
+            { id: 0056, apellidos_nombres: "Perez Pasaches, Sandy Ricardo", grado: "1", seccion: "B" },
+            { id: 0057, apellidos_nombres: "Prieto Santos, Jordan Ismael", grado: "1", seccion: "B" },
+            { id: 0058, apellidos_nombres: "Pulache Pasache, Ashley Cristell", grado: "1", seccion: "B" },
+            { id: 0059, apellidos_nombres: "Reyes Castro, Camila Nicol", grado: "1", seccion: "B" },
+            { id: 0060, apellidos_nombres: "Rivera Pacherres, Rosa Luhana", grado: "1", seccion: "B" },
+            { id: 0061, apellidos_nombres: "Rodriguez Diaz, Adriana Belen", grado: "1", seccion: "B" },
+            { id: 0062, apellidos_nombres: "Roman Mateo, Susan Cristeli", grado: "1", seccion: "B" },
+            { id: 0063, apellidos_nombres: "Saldaña Baltazar, Gonsalo Miguel", grado: "1", seccion: "B" },
+            { id: 0064, apellidos_nombres: "Tineo Ramos, Jahans Jatniel Smith", grado: "1", seccion: "B" },
+            { id: 0065, apellidos_nombres: "Vargas Carrion, Diego Sebastian", grado: "1", seccion: "B" },
+            { id: 0066, apellidos_nombres: "Velasquez Jimenez, Piero Alessandro", grado: "1", seccion: "B" },
+            { id: 0067, apellidos_nombres: "Vicente Chininin, Yanina", grado: "1", seccion: "B" },
+            { id: 0068, apellidos_nombres: "Yepez Alzamora, Jaime Manuel", grado: "1", seccion: "B" },
+
+            { id: 0069, apellidos_nombres: "Alzamora Atoche, Piero Fabricio", grado: "1", seccion: "C" },
+            { id: 0070, apellidos_nombres: "Ancajima Torres, Daniela Del Rosario", grado: "1", seccion: "C" },
+            { id: 0071, apellidos_nombres: "Bayona Flores, Edgar Yair", grado: "1", seccion: "C" },
+            { id: 0072, apellidos_nombres: "Carbajal Carmen, Dayron Jared", grado: "1", seccion: "C" },
+            { id: 0073, apellidos_nombres: "Cordova Ambulay, Alondra Yamillet Guadalupe", grado: "1", seccion: "C" },
+            { id: 0074, apellidos_nombres: "Cornejo Castillo, Thiago", grado: "1", seccion: "C" },
+            { id: 0075, apellidos_nombres: "Dioses Villavicencio, Derian Yeicob", grado: "1", seccion: "C" },
+            { id: 0076, apellidos_nombres: "Dominguez Arteaga, Ximena Almendra", grado: "1", seccion: "C" },
+            { id: 0077, apellidos_nombres: "Elias Ruiz, Jesimiel Nahomi", grado: "1", seccion: "C" },
+            { id: 0078, apellidos_nombres: "Garcia Chavez, Jesús", grado: "1", seccion: "C" },
+            { id: 0079, apellidos_nombres: "Gil Carhuapoma, Yanzumi Jian Li", grado: "1", seccion: "C" },
+            { id: 0080, apellidos_nombres: "Gomez Alama, Greace Marilyn", grado: "1", seccion: "C" },
+            { id: 0081, apellidos_nombres: "Herrera Jimenez, Ivanna", grado: "1", seccion: "C" },
+            { id: 0082, apellidos_nombres: "Huancas Perez, Jhon Jhamer", grado: "1", seccion: "C" },
+            { id: 0083, apellidos_nombres: "Jimenez Lloclla, Jheyms Biel Marti", grado: "1", seccion: "C" },
+            { id: 0084, apellidos_nombres: "Jimenez Sosa, Kiara De Los Angeles", grado: "1", seccion: "C" },
+            { id: 0085, apellidos_nombres: "Miranda Cordova, André Manuel", grado: "1", seccion: "C" },
+            { id: 0086, apellidos_nombres: "Mogollon Clavijo, Stiwar Smith", grado: "1", seccion: "C" },
+            { id: 0087, apellidos_nombres: "Montalban Purizaca, Thiago Lionel", grado: "1", seccion: "C" },
+            { id: 0088, apellidos_nombres: "Nima Flores, Vania Camila", grado: "1", seccion: "C" },
+            { id: 0089, apellidos_nombres: "Pintado Jimenez, Thiago Fabricio", grado: "1", seccion: "C" },
+            { id: 0090, apellidos_nombres: "Preciado Tocto, Lenyn Omar", grado: "1", seccion: "C" },
+            { id: 0091, apellidos_nombres: "Reyes Chamba, Adrian Dayino", grado: "1", seccion: "C" },
+            { id: 0092, apellidos_nombres: "Roman Garcia, Zaira Marisol", grado: "1", seccion: "C" },
+            { id: 0093, apellidos_nombres: "Ruiz Mechato, Nayely Pierina", grado: "1", seccion: "C" },
+            { id: 0094, apellidos_nombres: "Santacruz Santur, Mateo Smith", grado: "1", seccion: "C" },
+            { id: 0095, apellidos_nombres: "Santos Rivera, Matias Sebastian Segundo", grado: "1", seccion: "C" },
+            { id: 0096, apellidos_nombres: "Seminario Sullon, Mariagracia Jessia", grado: "1", seccion: "C" },
+            { id: 0097, apellidos_nombres: "Valdiviezo Yovera, Luis David", grado: "1", seccion: "C" },
+            { id: 0098, apellidos_nombres: "Valladolid Saba, Luhana Vanessa", grado: "1", seccion: "C" },
+            { id: 0099, apellidos_nombres: "Yovera Risco, Williams Smith", grado: "1", seccion: "C" },
+            { id: 0100, apellidos_nombres: "Zapata Castro, Nicola Valentino", grado: "1", seccion: "C" },
+
+            { id: 0101, apellidos_nombres: "Alvarez Garcia, Alicia", grado: "1", seccion: "D" },
+            { id: 0102, apellidos_nombres: "Andrade Paz, Jennifer", grado: "1", seccion: "D" },
+            { id: 0103, apellidos_nombres: "Arias Martinez, Valentina", grado: "1", seccion: "D" },
+            { id: 0104, apellidos_nombres: "Atoche Dominguez, Jesús Valentín", grado: "1", seccion: "D" },
+            { id: 0105, apellidos_nombres: "Cordova Castillo, Willian Nicolas", grado: "1", seccion: "D" },
+            { id: 0106, apellidos_nombres: "Cordova Marchena, Kimberly Dalesca", grado: "1", seccion: "D" },
+            { id: 0107, apellidos_nombres: "Eche Rivas, Emily Michell", grado: "1", seccion: "D" },
+            { id: 0108, apellidos_nombres: "Espinoza Jimenez, Alan Roger", grado: "1", seccion: "D" },
+            { id: 0109, apellidos_nombres: "Flores Saavedra, Bayron Fernando", grado: "1", seccion: "D" },
+            { id: 0110, apellidos_nombres: "Galvez Torres, Maria Jesus Fernanda", grado: "1", seccion: "D" },
+            { id: 0111, apellidos_nombres: "Gonzales Romero, Diego Andres", grado: "1", seccion: "D" },
+            { id: 0113, apellidos_nombres: "Huaman Diaz, Nayeli Alejandra", grado: "1", seccion: "D" },
+            { id: 0114, apellidos_nombres: "Huaman Flores, Genesis Abigail", grado: "1", seccion: "D" },
+            { id: 0115, apellidos_nombres: "Inga Carranza, Sebastian Elias", grado: "1", seccion: "D" },
+            { id: 0116, apellidos_nombres: "Inga Renteria, Gabriel David", grado: "1", seccion: "D" },
+            { id: 0117, apellidos_nombres: "Juarez Corzo, Maria De Los Angeles", grado: "1", seccion: "D" },
+            { id: 0118, apellidos_nombres: "Laban Cruz, Fernando Josue", grado: "1", seccion: "D" },
+            { id: 0119, apellidos_nombres: "Lopez Sosa, Samantha Nayara", grado: "1", seccion: "D" },
+            { id: 0120, apellidos_nombres: "Maza Valdez, Adriano Joseph", grado: "1", seccion: "D" },
+            { id: 0121, apellidos_nombres: "More Saavedra, Thiago Kaled", grado: "1", seccion: "D" },
+            { id: 0122, apellidos_nombres: "Navarro Dominguez, Daniela Xiomara", grado: "1", seccion: "D" },
+            { id: 0123, apellidos_nombres: "Nizama Alarcon, Alexis Jair", grado: "1", seccion: "D" },
+            { id: 0124, apellidos_nombres: "Peña Garabito, Jose Sneyder", grado: "1", seccion: "D" },
+            { id: 0125, apellidos_nombres: "Quiroga Chunga, Fred Santiago", grado: "1", seccion: "D" },
+            { id: 0126, apellidos_nombres: "Rimarachin Pimentel, Deysi Maria De Los Angeles", grado: "1", seccion: "D" },
+            { id: 0127, apellidos_nombres: "Rubio Chicoma, Salvador Excequiel", grado: "1", seccion: "D" },
+            { id: 0128, apellidos_nombres: "Ruiz Rosas, Abigail Marina Milet", grado: "1", seccion: "D" },
+            { id: 0129, apellidos_nombres: "Seminario Pumayalla, Gustavo Daniel", grado: "1", seccion: "D" },
+            { id: 0130, apellidos_nombres: "Silva Guevara, Jesus Isaias", grado: "1", seccion: "D" },
+            { id: 0131, apellidos_nombres: "Tantarico Farceque, Stefany Milena", grado: "1", seccion: "D" },
+            { id: 0132, apellidos_nombres: "Yovera Roman, Stefano David", grado: "1", seccion: "D" },
+            { id: 0133, apellidos_nombres: "Zeta Seminario, Dalesska Victoria", grado: "1", seccion: "D" },
+            { id: 0134, apellidos_nombres: "Zurita Ticliahuanca, Angyela Lucero", grado: "1", seccion: "D" },
+
+            { id: 0135, apellidos_nombres: "Acosta Santisteban, Milagros Lisbeth", grado: "2", seccion: "A" },
+            { id: 0136, apellidos_nombres: "Armijos Lopez, Abraham Angel Sinecio", grado: "2", seccion: "A" },
+            { id: 0137, apellidos_nombres: "Bonilla Carrasco, Arjen Adriel", grado: "2", seccion: "A" },
+            { id: 0138, apellidos_nombres: "Caballero Galopino, Kevin Fabricio Marvin", grado: "2", seccion: "A" },
+            { id: 0139, apellidos_nombres: "Chunga Camacho, Gardenia Guadalupe", grado: "2", seccion: "A" },
+            { id: 0140, apellidos_nombres: "Cordova Garcia, Dicsy Kareli", grado: "2", seccion: "A" },
+            { id: 0141, apellidos_nombres: "Cordova Mijahuanga, Marilesly Juliet", grado: "2", seccion: "A" },
+            { id: 0142, apellidos_nombres: "Gomez Icanaque, Jeffry Daniel", grado: "2", seccion: "A" },
+            { id: 0143, apellidos_nombres: "Gomez Valle, Omar Josue", grado: "2", seccion: "A" },
+            { id: 0144, apellidos_nombres: "Guerrero Atocha, Hiliana Bixeld", grado: "2", seccion: "A" },
+            { id: 0145, apellidos_nombres: "Gutierrez Crisanto, Luis David", grado: "2", seccion: "A" },
+            { id: 0146, apellidos_nombres: "Laban Lizana, Gerald Fernando", grado: "2", seccion: "A" },
+            { id: 0147, apellidos_nombres: "Machacuay Sanchez, Joseph Karim Stefano", grado: "2", seccion: "A" },
+            { id: 0148, apellidos_nombres: "Manchay Abad, Yaqueline", grado: "2", seccion: "A" },
+            { id: 0149, apellidos_nombres: "Marchan Arimuya, Angel Abdiel", grado: "2", seccion: "A" },
+            { id: 0150, apellidos_nombres: "Merino Aguilera, Gerson Adriano", grado: "2", seccion: "A" },
+            { id: 0151, apellidos_nombres: "Ordinola Purizaca, Luis Alfredo", grado: "2", seccion: "A" },
+            { id: 0152, apellidos_nombres: "Ordinola Purizaca, Luis Alonso", grado: "2", seccion: "A" },
+            { id: 0153, apellidos_nombres: "Pacherrez Atoche, Luis Angel", grado: "2", seccion: "A" },
+            { id: 0154, apellidos_nombres: "Paucar Farfan, Genesis Rubid", grado: "2", seccion: "A" },
+            { id: 0155, apellidos_nombres: "Pingo Taboada, Jhonatan Moises", grado: "2", seccion: "A" },
+            { id: 0156, apellidos_nombres: "Pingo Taboada, Noe David", grado: "2", seccion: "A" },
+            { id: 0157, apellidos_nombres: "Prado Farro, Massiel Valentina", grado: "2", seccion: "A" },
+            { id: 0158, apellidos_nombres: "Quispe Berru, Ursula Alexandra", grado: "2", seccion: "A" },
+            { id: 0159, apellidos_nombres: "Rivera Tineo, Dayana Nicol", grado: "2", seccion: "A" },
+            { id: 0160, apellidos_nombres: "Rufino Velasquez, Dayiro Alejandro", grado: "2", seccion: "A" },
+            { id: 0161, apellidos_nombres: "Saavedra Abad, Keyla Marilly", grado: "2", seccion: "A" },
+            { id: 0162, apellidos_nombres: "Sanchez Moreno, Luis Enrique", grado: "2", seccion: "A" },
+            { id: 0163, apellidos_nombres: "Seminario Chero, Aytana Milagritos", grado: "2", seccion: "A" },
+            { id: 0164, apellidos_nombres: "Silva Guevara, Briani Joselin", grado: "2", seccion: "A" },
+            { id: 0165, apellidos_nombres: "Tocto Ortiz, Korina De Los Angeles", grado: "2", seccion: "A" },
+
+            { id: 0166, apellidos_nombres: "Aguilera Cruz, Yamilet Rossmery", grado: "2", seccion: "B" },
+            { id: 0167, apellidos_nombres: "Alvarez Pintado, Victor Hugo", grado: "2", seccion: "B" },
+            { id: 0168, apellidos_nombres: "Amaya Arteaga, Ysabella Zuriel", grado: "2", seccion: "B" },
+            { id: 0169, apellidos_nombres: "Arrunategui Silva, Angel Biel", grado: "2", seccion: "B" },
+            { id: 0170, apellidos_nombres: "Arteaga Lizano, Andrea Luciana", grado: "2", seccion: "B" },
+            { id: 0171, apellidos_nombres: "Arteaga Pacherrez, Luna Milagros", grado: "2", seccion: "B" },
+            { id: 0172, apellidos_nombres: "Atarama Gonzales, Giancarlos Benjamin", grado: "2", seccion: "B" },
+            { id: 0173, apellidos_nombres: "Aymar Navarro, Bayron Jair", grado: "2", seccion: "B" },
+            { id: 0174, apellidos_nombres: "Barco Fiestas, Cristofer Noe", grado: "2", seccion: "B" },
+            { id: 0175, apellidos_nombres: "Carhuapoma Gallo, Renzo Jesus", grado: "2", seccion: "B" },
+            { id: 0176, apellidos_nombres: "Choquehuanca Abad, Taylor Jaréh", grado: "2", seccion: "B" },
+            { id: 0177, apellidos_nombres: "Cruz Maza, Jhon Kelvin", grado: "2", seccion: "B" },
+            { id: 0178, apellidos_nombres: "Facundo Calderon, Hans Smith", grado: "2", seccion: "B" },
+            { id: 0179, apellidos_nombres: "Garcia Pulache, Luciana Katherine", grado: "2", seccion: "B" },
+            { id: 0180, apellidos_nombres: "Gomez Chero, Thiago Alessandro", grado: "2", seccion: "B" },
+            { id: 0181, apellidos_nombres: "Goyes Feria, José Aaron Jeremias", grado: "2", seccion: "B" },
+            { id: 0182, apellidos_nombres: "Jimenez Garcia, Karen Liset", grado: "2", seccion: "B" },
+            { id: 0183, apellidos_nombres: "Lachira Lopez, Cristofer Josue", grado: "2", seccion: "B" },
+            { id: 0184, apellidos_nombres: "Morocho Jara, Lisbeth Anel", grado: "2", seccion: "B" },
+            { id: 0185, apellidos_nombres: "Nonajulca Piñin, Cristhian Ronaldo", grado: "2", seccion: "B" },
+            { id: 0186, apellidos_nombres: "Ojeda Cordova, Alesandra Lizbet", grado: "2", seccion: "B" },
+            { id: 0187, apellidos_nombres: "Ojeda Cordova, Damaris Valeria", grado: "2", seccion: "B" },
+            { id: 0188, apellidos_nombres: "Otero Tocto, Jared Benjamin", grado: "2", seccion: "B" },
+            { id: 0189, apellidos_nombres: "Paz Cueva, Jasumy Jakeline", grado: "2", seccion: "B" },
+            { id: 0190, apellidos_nombres: "Pintado Yahuana, Snayder Johao", grado: "2", seccion: "B" },
+            { id: 0192, apellidos_nombres: "Rugel Dominguez, Mariana Antonella", grado: "2", seccion: "B" },
+            { id: 0193, apellidos_nombres: "Ruiz Lopez, Renzo", grado: "2", seccion: "B" },
+            { id: 0194, apellidos_nombres: "Saavedra Cruz, Maykin Martin", grado: "2", seccion: "B" },
+            { id: 0195, apellidos_nombres: "Samaniego Tizon, Abrahan Smith", grado: "2", seccion: "B" },
+            { id: 0196, apellidos_nombres: "Sancarranco Yarleque, Snayder Damian", grado: "2", seccion: "B" },
+            { id: 0197, apellidos_nombres: "Sanchez Salmon, Christian Evan", grado: "2", seccion: "B" },
+            { id: 0198, apellidos_nombres: "Sandoval Flores, Maricielo Guadalupe", grado: "2", seccion: "B" },
+            { id: 0199, apellidos_nombres: "Siancas Gutierrez, Yosúe Moisés", grado: "2", seccion: "B" },
+            { id: 0200, apellidos_nombres: "Torrez Arteaga, Milangely Alejandra", grado: "2", seccion: "B" },
+            { id: 0201, apellidos_nombres: "Zapata Palacios, Thiago Samir", grado: "2", seccion: "B" },
+
+            { id: 0202, apellidos_nombres: "Arango Viera, Ximena Alexandra", grado: "2", seccion: "C" },
+            { id: 0203, apellidos_nombres: "Baltazar Guerrero, Emily Lisbet", grado: "2", seccion: "C" },
+            { id: 0204, apellidos_nombres: "Barco Cordova, Angel Leandro", grado: "2", seccion: "C" },
+            { id: 0205, apellidos_nombres: "Boza Yarleque, Maykol Stefano", grado: "2", seccion: "C" },
+            { id: 0206, apellidos_nombres: "Carreño Urbina, Valeria Nicoll", grado: "2", seccion: "C" },
+            { id: 0207, apellidos_nombres: "Castillo Sojo, Leandro Mathias", grado: "2", seccion: "C" },
+            { id: 0208, apellidos_nombres: "Choquehuanca Navarro, Aylin Anyelen", grado: "2", seccion: "C" },
+            { id: 0209, apellidos_nombres: "Farfan Garcia, Oriana Camila", grado: "2", seccion: "C" },
+            { id: 0210, apellidos_nombres: "Flores Morales, Cristhofer Aaron", grado: "2", seccion: "C" },
+            { id: 0211, apellidos_nombres: "Ibañez Castillo, Luz Daela", grado: "2", seccion: "C" },
+            { id: 0212, apellidos_nombres: "Inga Huanca, Jose David", grado: "2", seccion: "C" },
+            { id: 0213, apellidos_nombres: "Mauricio Estrada, Ariana Lucero", grado: "2", seccion: "C" },
+            { id: 0214, apellidos_nombres: "Medina Camizan, Luana Layoneht Antuanet", grado: "2", seccion: "C" },
+            { id: 0215, apellidos_nombres: "Naucar Cordova, Paola Lizbeth", grado: "2", seccion: "C" },
+            { id: 0216, apellidos_nombres: "Nima Cordova, Josè Antony", grado: "2", seccion: "C" },
+            { id: 0217, apellidos_nombres: "Ortiz Samillan, Josue David", grado: "2", seccion: "C" },
+            { id: 0218, apellidos_nombres: "Peña Chavez, Dayiro Alexandro", grado: "2", seccion: "C" },
+            { id: 0219, apellidos_nombres: "Pretell Esteves, Dayra Guadalupe", grado: "2", seccion: "C" },
+            { id: 0220, apellidos_nombres: "Rivas Andrade, Sebastian Smith", grado: "2", seccion: "C" },
+            { id: 0221, apellidos_nombres: "Rivera Flores, Luhana Arelhi", grado: "2", seccion: "C" },
+            { id: 0222, apellidos_nombres: "Sandoval Talledo, Santiago Alonso", grado: "2", seccion: "C" },
+            { id: 0223, apellidos_nombres: "Silva Lopez, Guillermo Osvaldo", grado: "2", seccion: "C" },
+            { id: 0224, apellidos_nombres: "Solano Humbo, Juan Carlos Alexander", grado: "2", seccion: "C" },
+            { id: 0225, apellidos_nombres: "Sondor Cordova, Juan Jamer", grado: "2", seccion: "C" },
+            { id: 0226, apellidos_nombres: "Sullon Garcia, Alvaro Esmit", grado: "2", seccion: "C" },
+            { id: 0227, apellidos_nombres: "Timana Ipanaque, Adrian Alexander", grado: "2", seccion: "C" },
+            { id: 0228, apellidos_nombres: "Timoteo Garcia, Miller Snaider", grado: "2", seccion: "C" },
+            { id: 0229, apellidos_nombres: "Vilchez Neira, Jose Miguel", grado: "2", seccion: "C" },
+            { id: 0230, apellidos_nombres: "Yanayaco Chinchay, Lucas Michel", grado: "2", seccion: "C" },
+            { id: 0231, apellidos_nombres: "Zurita Ticliahuanca, Aron Eduardo", grado: "2", seccion: "C" },
+
+            { id: 0232, apellidos_nombres: "Abad Giron, Cintia Joana", grado: "2", seccion: "D" },
+            { id: 0233, apellidos_nombres: "Acaro Livia, Axel Eduardo", grado: "2", seccion: "D" },
+            { id: 0234, apellidos_nombres: "Alban Montenegro, Reyneer Edu", grado: "2", seccion: "D" },
+            { id: 0235, apellidos_nombres: "Ames Peña, Tirsa Maylin Gissel", grado: "2", seccion: "D" },
+            { id: 0236, apellidos_nombres: "Anastacio Lozada, Cristhoper Del Piero", grado: "2", seccion: "D" },
+            { id: 0237, apellidos_nombres: "Anton Condor, Neymar Alberto", grado: "2", seccion: "D" },
+            { id: 0238, apellidos_nombres: "Armijos Cordova, Shirley Vanessa", grado: "2", seccion: "D" },
+            { id: 0239, apellidos_nombres: "Bocanegra Quispe, Grecia Nicoll", grado: "2", seccion: "D" },
+            { id: 0240, apellidos_nombres: "Carvajulca Calle, Andrea Lizbeth", grado: "2", seccion: "D" },
+            { id: 0241, apellidos_nombres: "Castañeda Escobar, Stefano Sebastián", grado: "2", seccion: "D" },
+            { id: 0242, apellidos_nombres: "Castillo Marquez, Sofia Dalila", grado: "2", seccion: "D" },
+            { id: 0243, apellidos_nombres: "Cordova Vasquez, Josue Erikson", grado: "2", seccion: "D" },
+            { id: 0244, apellidos_nombres: "Cornejo Jara, Jeico Salvador", grado: "2", seccion: "D" },
+            { id: 0245, apellidos_nombres: "Dominguez Saguma, Josemaria Anthony", grado: "2", seccion: "D" },
+            { id: 0246, apellidos_nombres: "Garcia Livia Poma, Jesus Nataniel", grado: "2", seccion: "D" },
+            { id: 0247, apellidos_nombres: "Huaman Sanchez, Luna Maricielo", grado: "2", seccion: "D" },
+            { id: 0248, apellidos_nombres: "Mogollon Rivera, Karim Dayiro", grado: "2", seccion: "D" },
+            { id: 0249, apellidos_nombres: "Morales Bustamante, Angelina Noelia", grado: "2", seccion: "D" },
+            { id: 0250, apellidos_nombres: "Moreno La Barrera, Juan Manuel Pablo", grado: "2", seccion: "D" },
+            { id: 0251, apellidos_nombres: "Navarro Vivanco, Leandro Mathias", grado: "2", seccion: "D" },
+            { id: 0252, apellidos_nombres: "Ortega Renteria, Edelvis Yeilin", grado: "2", seccion: "D" },
+            { id: 0253, apellidos_nombres: "Pallete Puell, Ariana Carolina", grado: "2", seccion: "D" },
+            { id: 0254, apellidos_nombres: "Peña Hernandez, Jeniffer Yamilet", grado: "2", seccion: "D" },
+            { id: 0255, apellidos_nombres: "Rivera Samaniego, Cesar Gabriel", grado: "2", seccion: "D" },
+            { id: 0256, apellidos_nombres: "Rojas Flores, Keydi Priscila", grado: "2", seccion: "D" },
+            { id: 0257, apellidos_nombres: "Salazar Mayanga, Frank Sebastian", grado: "2", seccion: "D" },
+            { id: 0258, apellidos_nombres: "Sanchez Nuñez, Zarela Yamile", grado: "2", seccion: "D" },
+            { id: 0259, apellidos_nombres: "Seminario Sullon, Mariafe", grado: "2", seccion: "D" },
+            { id: 0260, apellidos_nombres: "Timana Arrunategui, Rodrigo Samuel", grado: "2", seccion: "D" },
+            { id: 0261, apellidos_nombres: "Vargas Carrion, Antony Leonel", grado: "2", seccion: "D" },
+
+            { id: 0262, apellidos_nombres: "Acaro Timana, Albert Jair", grado: "3", seccion: "A" },
+            { id: 0263, apellidos_nombres: "Alama Maceda, Lizbeth Del Pilar", grado: "3", seccion: "A" },
+            { id: 0264, apellidos_nombres: "Barranzuela Heredia, Jeral Smith", grado: "3", seccion: "A" },
+            { id: 0265, apellidos_nombres: "Benavides Benites, Ivana Naomi", grado: "3", seccion: "A" },
+            { id: 0266, apellidos_nombres: "Cruz Sernaque, Luz Marina", grado: "3", seccion: "A" },
+            { id: 0267, apellidos_nombres: "Dominguez Bautista, Victor Manuel", grado: "3", seccion: "A" },
+            { id: 0268, apellidos_nombres: "Dominguez Escajadillo, Karoline Nicole", grado: "3", seccion: "A" },
+            { id: 0269, apellidos_nombres: "Espinoza Jimenez, Francisco Aldo", grado: "3", seccion: "A" },
+            { id: 0270, apellidos_nombres: "Farro Rodriguez, Diego Alonso Martin", grado: "3", seccion: "A" },
+            { id: 0271, apellidos_nombres: "Fernandez Ibañez, Dayiro Ismael", grado: "3", seccion: "A" },
+            { id: 0272, apellidos_nombres: "Flores Puelles, Analy Naomi", grado: "3", seccion: "A" },
+            { id: 0273, apellidos_nombres: "Guevara Muñoz, Wuilianyelis Estefanny", grado: "3", seccion: "A" },
+            { id: 0274, apellidos_nombres: "Huaman Culquicondor, Felix Neymar", grado: "3", seccion: "A" },
+            { id: 0275, apellidos_nombres: "Ipanaque Palacios, Olenka Adriana", grado: "3", seccion: "A" },
+            { id: 0276, apellidos_nombres: "Jimenez Crisanto, Brus Angel", grado: "3", seccion: "A" },
+            { id: 0277, apellidos_nombres: "Juarez Sondor, Iker Leonel", grado: "3", seccion: "A" },
+            { id: 0278, apellidos_nombres: "Meca Abad, Susana Bersabeth", grado: "3", seccion: "A" },
+            { id: 0279, apellidos_nombres: "Miranda Cordova, Eduardo Reyner", grado: "3", seccion: "A" },
+            { id: 0280, apellidos_nombres: "Miranda Cordova, Ruvic Vialejaví", grado: "3", seccion: "A" },
+            { id: 0281, apellidos_nombres: "Miranda Saldaña, Mathias Luciano", grado: "3", seccion: "A" },
+            { id: 0282, apellidos_nombres: "Morales Mogollon, Stefany Ximena", grado: "3", seccion: "A" },
+            { id: 0283, apellidos_nombres: "More Rios, Nasira Jesús", grado: "3", seccion: "A" },
+            { id: 0284, apellidos_nombres: "Nilupu Sullon, Maryori Elisabeth", grado: "3", seccion: "A" },
+            { id: 0285, apellidos_nombres: "Palacios Ruiz, Carlos Daniel", grado: "3", seccion: "A" },
+            { id: 0286, apellidos_nombres: "Peralta La Barrera, Jeancarlos Miguel", grado: "3", seccion: "A" },
+            { id: 0287, apellidos_nombres: "Santacruz Santur, Dwayner Jair", grado: "3", seccion: "A" },
+            { id: 0288, apellidos_nombres: "Silupu Naucar, Xiomara Nicol", grado: "3", seccion: "A" },
+            { id: 0289, apellidos_nombres: "Tello Tocto, Daniela Naommy", grado: "3", seccion: "A" },
+            { id: 0290, apellidos_nombres: "Tume Camizan, Oriana Kristell", grado: "3", seccion: "A" },
+            { id: 0291, apellidos_nombres: "Valverde Gonzales, Barbara Sholays", grado: "3", seccion: "A" },
+            { id: 0292, apellidos_nombres: "Valverde Gonzales, Wendoly Sofia", grado: "3", seccion: "A" },
+            { id: 0293, apellidos_nombres: "Villegas Boulangger, Dayana Michel", grado: "3", seccion: "A" },
+            { id: 0294, apellidos_nombres: "Ybañez Castillo, Dana Lucia", grado: "3", seccion: "A" },
+
+            { id: 0295, apellidos_nombres: "Abad Calva, Jose Sneijder", grado: "3", seccion: "B" },
+            { id: 0296, apellidos_nombres: "Alban Cardenas, Lucero Elizabeth", grado: "3", seccion: "B" },
+            { id: 0297, apellidos_nombres: "Ancajima Torres, Fiorela Del Rosario", grado: "3", seccion: "B" },
+            { id: 0298, apellidos_nombres: "Arevalo Tocto, Daniela Kassandra", grado: "3", seccion: "B" },
+            { id: 0299, apellidos_nombres: "Arica Melgar, Davis Del Piero", grado: "3", seccion: "B" },
+            { id: 0300, apellidos_nombres: "Ayala Palomino, Dana Michell", grado: "3", seccion: "B" },
+            { id: 0301, apellidos_nombres: "Carranza Castillo, Estrella Guadalupe", grado: "3", seccion: "B" },
+            { id: 0302, apellidos_nombres: "Castillo Andrade, Luhana Valentina", grado: "3", seccion: "B" },
+            { id: 0303, apellidos_nombres: "Castillo Nima, Axel Sneijder", grado: "3", seccion: "B" },
+            { id: 0304, apellidos_nombres: "Cortez Pulache, Yamilet Fabiola", grado: "3", seccion: "B" },
+            { id: 0305, apellidos_nombres: "Farfan Cornejo, Joel Jean Carlos", grado: "3", seccion: "B" },
+            { id: 0306, apellidos_nombres: "Giron Saavedra, Valerie Xiomara", grado: "3", seccion: "B" },
+            { id: 0307, apellidos_nombres: "Gutierrez Chunga, Rafael Enrique", grado: "3", seccion: "B" },
+            { id: 0308, apellidos_nombres: "Jimenez Lloclla, Jhosvin Stiven", grado: "3", seccion: "B" },
+            { id: 0309, apellidos_nombres: "Jimenez Montalban, Deiver", grado: "3", seccion: "B" },
+            { id: 0310, apellidos_nombres: "Juarez Morales, Josué Josimar", grado: "3", seccion: "B" },
+            { id: 0311, apellidos_nombres: "Lipa Rodriguez, Cielo Angelinne", grado: "3", seccion: "B" },
+            { id: 0312, apellidos_nombres: "Litano Marcelo, Estrella Guadalupe", grado: "3", seccion: "B" },
+            { id: 0313, apellidos_nombres: "Manchay Rondoy, Luis Angel", grado: "3", seccion: "B" },
+            { id: 0314, apellidos_nombres: "Martinez Yovera, Angel David", grado: "3", seccion: "B" },
+            { id: 0315, apellidos_nombres: "Montero Alvarado, Stephano Fabrizio", grado: "3", seccion: "B" },
+            { id: 0316, apellidos_nombres: "Niño Lima, Haryly Inmaelo", grado: "3", seccion: "B" },
+            { id: 0317, apellidos_nombres: "Oliva Cardenas, Allinson Georgine", grado: "3", seccion: "B" },
+            { id: 0318, apellidos_nombres: "Otero Freyre, Luis Miguel", grado: "3", seccion: "B" },
+            { id: 0319, apellidos_nombres: "Requena Cordova, Andrea Alexandra", grado: "3", seccion: "B" },
+            { id: 0320, apellidos_nombres: "Rugel Dominguez, Jean Franco Alexis", grado: "3", seccion: "B" },
+            { id: 0321, apellidos_nombres: "Saavedra Chinguel, Luis Orlando", grado: "3", seccion: "B" },
+            { id: 0322, apellidos_nombres: "Silva Chorres, Yireth Alexandra", grado: "3", seccion: "B" },
+            { id: 0323, apellidos_nombres: "Sondor Cruz, Gerard Arian", grado: "3", seccion: "B" },
+            { id: 0324, apellidos_nombres: "Vilchez Neira, Green Andy Segundo", grado: "3", seccion: "B" },
+            { id: 0325, apellidos_nombres: "Zavaleta Criollo, Rodman Zanelio", grado: "3", seccion: "B" },
+
+            { id: 0326, apellidos_nombres: "Alban Cardenas, Maria Anabel", grado: "3", seccion: "C" },
+            { id: 0327, apellidos_nombres: "Amaya Panta, Felipe Jesus", grado: "3", seccion: "C" },
+            { id: 0328, apellidos_nombres: "Arrunategui Silva, Xiomara Guadalupe", grado: "3", seccion: "C" },
+            { id: 0329, apellidos_nombres: "Avila Abad, Snaider Eduardo", grado: "3", seccion: "C" },
+            { id: 0330, apellidos_nombres: "Avila Sernaque, Ariana Nicol", grado: "3", seccion: "C" },
+            { id: 0331, apellidos_nombres: "Calle Preciado, Barbara Isabel", grado: "3", seccion: "C" },
+            { id: 0332, apellidos_nombres: "Castillo Marquez, Guadalupe Cristhel", grado: "3", seccion: "C" },
+            { id: 0333, apellidos_nombres: "Cordova Flores, Antoinette Dayanara", grado: "3", seccion: "C" },
+            { id: 0334, apellidos_nombres: "Cordova Garcia, Ivan Jhunior", grado: "3", seccion: "C" },
+            { id: 0335, apellidos_nombres: "Cornejo Sosa, Alexis David", grado: "3", seccion: "C" },
+            { id: 0336, apellidos_nombres: "Dominguez Yman, Angel Adriano Milosz", grado: "3", seccion: "C" },
+            { id: 0337, apellidos_nombres: "Esteves Palacios, Jhair Andersson", grado: "3", seccion: "C" },
+            { id: 0338, apellidos_nombres: "Farfan Moscol, Maria Fernanda", grado: "3", seccion: "C" },
+            { id: 0339, apellidos_nombres: "Juarez Medrano, Matias Jaret Naim", grado: "3", seccion: "C" },
+            { id: 0340, apellidos_nombres: "Juarez Puelles, Elvita Mia", grado: "3", seccion: "C" },
+            { id: 0341, apellidos_nombres: "Ladines Umbo, Jerson Fabian", grado: "3", seccion: "C" },
+            { id: 0342, apellidos_nombres: "Marchan Arimuya, Cristina Belen", grado: "3", seccion: "C" },
+            { id: 0343, apellidos_nombres: "Martinez Cortez, Leticia Isabel", grado: "3", seccion: "C" },
+            { id: 0344, apellidos_nombres: "Mogollon Temoche, Agustín Enmanuel Nahúm", grado: "3", seccion: "C" },
+            { id: 0345, apellidos_nombres: "Morales Vasquez, Jesus Santiago", grado: "3", seccion: "C" },
+            { id: 0346, apellidos_nombres: "Olazabal Yamunaque, Guadalupe Michel", grado: "3", seccion: "C" },
+            { id: 0347, apellidos_nombres: "Palacios Lopez, Cristtian Andersson", grado: "3", seccion: "C" },
+            { id: 0348, apellidos_nombres: "Pintado Flores, Juan Joel", grado: "3", seccion: "C" },
+            { id: 0349, apellidos_nombres: "Seminario Frias, Eduardo Del Piero", grado: "3", seccion: "C" },
+            { id: 0350, apellidos_nombres: "Silupu Jara, Mariana Alexandra", grado: "3", seccion: "C" },
+            { id: 0351, apellidos_nombres: "Suarez Guerrero, Luis Angel", grado: "3", seccion: "C" },
+            { id: 0352, apellidos_nombres: "Tineo Mauricio, Kenyi Aelem", grado: "3", seccion: "C" },
+            { id: 0353, apellidos_nombres: "Tocto Zapata, Sayaka Aiko", grado: "3", seccion: "C" },
+            { id: 0354, apellidos_nombres: "Valdiviezo Becerra, Victor Manuel", grado: "3", seccion: "C" },
+            { id: 0355, apellidos_nombres: "Vilela Guzman, Leonardo Josue", grado: "3", seccion: "C" },
+            { id: 0356, apellidos_nombres: "Yahuana Mechato, Milenka Kaomy", grado: "3", seccion: "C" },
+            { id: 0357, apellidos_nombres: "Yajahuanca Castillo, Jenifer Nicol", grado: "3", seccion: "C" },
+
+            { id: 0358, apellidos_nombres: "Aguirre Julca, Astrid Marianell", grado: "3", seccion: "D" },
+            { id: 0359, apellidos_nombres: "Alayo Gonzales, Oriana Nicoll", grado: "3", seccion: "D" },
+            { id: 0360, apellidos_nombres: "Alcas Reyes, Zuheidy Maday", grado: "3", seccion: "D" },
+            { id: 0361, apellidos_nombres: "Alvarado Morales, Estrella Valentina", grado: "3", seccion: "D" },
+            { id: 0362, apellidos_nombres: "Cayetano Corzo, Dayron Smith", grado: "3", seccion: "D" },
+            { id: 0363, apellidos_nombres: "Chapoñan Navarro, José Manuel", grado: "3", seccion: "D" },
+            { id: 0364, apellidos_nombres: "Chiroque Palacios, Mateo Angelo", grado: "3", seccion: "D" },
+            { id: 0365, apellidos_nombres: "Damian Rosales, Kaori Alessandra", grado: "3", seccion: "D" },
+            { id: 0366, apellidos_nombres: "Elias Troncos, Ana Milet Guadalupe", grado: "3", seccion: "D" },
+            { id: 0367, apellidos_nombres: "Espinoza Gomez, Mathias Ramon", grado: "3", seccion: "D" },
+            { id: 0368, apellidos_nombres: "Feria Correa, Jordy Alexander", grado: "3", seccion: "D" },
+            { id: 0369, apellidos_nombres: "Gonzales Espinoza, Stefano Alexander", grado: "3", seccion: "D" },
+            { id: 0370, apellidos_nombres: "Jara Chinguel, Camila Xiomara", grado: "3", seccion: "D" },
+            { id: 0371, apellidos_nombres: "Marchan Arimuya, Jafet Daniel", grado: "3", seccion: "D" },
+            { id: 0372, apellidos_nombres: "Orozco Garcia, Any Alexandra", grado: "3", seccion: "D" },
+            { id: 0373, apellidos_nombres: "Paz Peredo, Mauro Jeins Smit", grado: "3", seccion: "D" },
+            { id: 0374, apellidos_nombres: "Ramirez Aguilera, Cristian Jesús", grado: "3", seccion: "D" },
+            { id: 0375, apellidos_nombres: "Raymundo Chulle, Fidel Fabiano", grado: "3", seccion: "D" },
+            { id: 0376, apellidos_nombres: "Retete Chinchay, Anthony Gabriel", grado: "3", seccion: "D" },
+            { id: 0377, apellidos_nombres: "Reyes Chamba, Luhana Jazmin", grado: "3", seccion: "D" },
+            { id: 0378, apellidos_nombres: "Saavedra Arevalo, Isaul Hernando", grado: "3", seccion: "D" },
+            { id: 0379, apellidos_nombres: "Saldarriaga Vilchez, Mayky Esduardo", grado: "3", seccion: "D" },
+            { id: 0380, apellidos_nombres: "Sanchez Viera, Ariana Camila", grado: "3", seccion: "D" },
+            { id: 0381, apellidos_nombres: "Sandoval Cevedon, Luis Enrique", grado: "3", seccion: "D" },
+            { id: 0382, apellidos_nombres: "Santos Sernaque, Darlyn Abigail", grado: "3", seccion: "D" },
+            { id: 0383, apellidos_nombres: "Seminario Garcia, Maria Fé Camila", grado: "3", seccion: "D" },
+            { id: 0384, apellidos_nombres: "Seminario Sullon, Maríajosé Del Socorro", grado: "3", seccion: "D" },
+            { id: 0385, apellidos_nombres: "Silva Flores, Noelia Seleste", grado: "3", seccion: "D" },
+            { id: 0386, apellidos_nombres: "Tocto Maza, Carlos Manuel", grado: "3", seccion: "D" },
+            { id: 0387, apellidos_nombres: "Torrez Arteaga, Aaron Alejandro", grado: "3", seccion: "D" },
+            { id: 0388, apellidos_nombres: "Velasquez Garcia, Leythón Edu", grado: "3", seccion: "D" },
+
+            { id: 0389, apellidos_nombres: "Agurto Siancas, Diego Ricardo", grado: "4", seccion: "A" },
+            { id: 0390, apellidos_nombres: "Bayona Flores, Antony Aldair", grado: "4", seccion: "A" },
+            { id: 0391, apellidos_nombres: "Briceño Carranza, Job Wilfredo", grado: "4", seccion: "A" },
+            { id: 0392, apellidos_nombres: "Castillo Nima, Ashley Nataniel", grado: "4", seccion: "A" },
+            { id: 0393, apellidos_nombres: "Chanta Tineo, Luis Angel", grado: "4", seccion: "A" },
+            { id: 0394, apellidos_nombres: "Chinga Zapata, Ariana Mercedes", grado: "4", seccion: "A" },
+            { id: 0395, apellidos_nombres: "Chuica Ipanaque, Yakori Naomi", grado: "4", seccion: "A" },
+            { id: 0396, apellidos_nombres: "Chumacero Cruz, Luana Yacira", grado: "4", seccion: "A" },
+            { id: 0397, apellidos_nombres: "Colan Jimenez, Leonardo Miguel", grado: "4", seccion: "A" },
+            { id: 0398, apellidos_nombres: "Cruz Cruz, Marco Josue", grado: "4", seccion: "A" },
+            { id: 0399, apellidos_nombres: "Espinoza Pasaches, Eddy Santiago", grado: "4", seccion: "A" },
+            { id: 0400, apellidos_nombres: "Fernandez Garcia, Valeri De Los Angeles", grado: "4", seccion: "A" },
+            { id: 0401, apellidos_nombres: "Garcia Usquiza, Leonard Saul", grado: "4", seccion: "A" },
+            { id: 0402, apellidos_nombres: "Gomez Valle, Cristhian David", grado: "4", seccion: "A" },
+            { id: 0403, apellidos_nombres: "Gutierrez Litano, Harold Andres", grado: "4", seccion: "A" },
+            { id: 0404, apellidos_nombres: "Huacchillo Aguilar, Carlos Alonso", grado: "4", seccion: "A" },
+            { id: 0405, apellidos_nombres: "Ibañez Garcia, Josue Daniel", grado: "4", seccion: "A" },
+            { id: 0406, apellidos_nombres: "Ipanaque Sanchez, Jaico Joel", grado: "4", seccion: "A" },
+            { id: 0407, apellidos_nombres: "Laban Cruz, Eduardo Samuel", grado: "4", seccion: "A" },
+            { id: 0408, apellidos_nombres: "Lopez Siancas, Jesús Sebastián", grado: "4", seccion: "A" },
+            { id: 0409, apellidos_nombres: "Lopez Vicente, Angel Ricardo", grado: "4", seccion: "A" },
+            { id: 0410, apellidos_nombres: "Martinez Valencia, Fabian Alexander", grado: "4", seccion: "A" },
+            { id: 0411, apellidos_nombres: "Navarro Vivanco, Joan Jamison", grado: "4", seccion: "A" },
+            { id: 0412, apellidos_nombres: "Nima Cordova, Andy Jesús", grado: "4", seccion: "A" },
+            { id: 0413, apellidos_nombres: "Purizaca Morales, Ximena Antonela", grado: "4", seccion: "A" },
+            { id: 0414, apellidos_nombres: "Ramos Gutierrez, Jose Antonio", grado: "4", seccion: "A" },
+            { id: 0415, apellidos_nombres: "Rivera Flores, Gianella Naomy", grado: "4", seccion: "A" },
+            { id: 0416, apellidos_nombres: "Romero Sandoval, Maximiliano Stalin", grado: "4", seccion: "A" },
+            { id: 0417, apellidos_nombres: "Rosillo Carrion, Nicks Valentino", grado: "4", seccion: "A" },
+            { id: 0418, apellidos_nombres: "Sanchez Moreno, Oriana Moncerrat", grado: "4", seccion: "A" },
+            { id: 0419, apellidos_nombres: "Tacure Flores, Ruth Noemí", grado: "4", seccion: "A" },
+            { id: 0420, apellidos_nombres: "Valdez Ventura, Dayana Nicol", grado: "4", seccion: "A" },
+
+            { id: 0421, apellidos_nombres: "Alvarado Torres, Ruth Abigail", grado: "4", seccion: "B" },
+            { id: 0422, apellidos_nombres: "Bravo Abad, Jhonathan Randy", grado: "4", seccion: "B" },
+            { id: 0423, apellidos_nombres: "Briceño Monsalve, Job Haasiel", grado: "4", seccion: "B" },
+            { id: 0424, apellidos_nombres: "Cordova Garcia, Altair Stanly", grado: "4", seccion: "B" },
+            { id: 0425, apellidos_nombres: "Cordova Gomez, Josue Daniel", grado: "4", seccion: "B" },
+            { id: 0426, apellidos_nombres: "Cordova Perez, Jimena Aracely", grado: "4", seccion: "B" },
+            { id: 0427, apellidos_nombres: "Delgado Juarez, Nicole Giulliana", grado: "4", seccion: "B" },
+            { id: 0428, apellidos_nombres: "Eche Tavara, Bayoleth Jharumy Lisbeth", grado: "4", seccion: "B" },
+            { id: 0429, apellidos_nombres: "Espinoza Jimenez, Aldo Junior", grado: "4", seccion: "B" },
+            { id: 0430, apellidos_nombres: "Goyes Feria, Dorian David", grado: "4", seccion: "B" },
+            { id: 0431, apellidos_nombres: "Hernandez Carranza, Henry Josue", grado: "4", seccion: "B" },
+            { id: 0432, apellidos_nombres: "Iman Alarcon, Pablo", grado: "4", seccion: "B" },
+            { id: 0433, apellidos_nombres: "Inga Carranza, Angel Snayder", grado: "4", seccion: "B" },
+            { id: 0434, apellidos_nombres: "Ipanaque Flores, David Abraham", grado: "4", seccion: "B" },
+            { id: 0435, apellidos_nombres: "Ipanaque Flores, Joel Isaac", grado: "4", seccion: "B" },
+            { id: 0436, apellidos_nombres: "Jaimes Reyes, María Del Socorro", grado: "4", seccion: "B" },
+            { id: 0437, apellidos_nombres: "Jimenez Purizaca, Celeste Camila Guadalupe", grado: "4", seccion: "B" },
+            { id: 0438, apellidos_nombres: "Julca Guarnizo, Luciana Mercedes", grado: "4", seccion: "B" },
+            { id: 0439, apellidos_nombres: "Lozada Nuñez, Claireth Areli De Los Angeles", grado: "4", seccion: "B" },
+            { id: 0440, apellidos_nombres: "Michilot Lezcano, Jireth Alexandra", grado: "4", seccion: "B" },
+            { id: 0441, apellidos_nombres: "Montero Juarez, Jusetté Ivana", grado: "4", seccion: "B" },
+            { id: 0442, apellidos_nombres: "Nieto Vilchez, Marco Antonio", grado: "4", seccion: "B" },
+            { id: 0443, apellidos_nombres: "Peralta Ramos, Luis Martin", grado: "4", seccion: "B" },
+            { id: 0444, apellidos_nombres: "Pintado Flores, Gracia Jireh", grado: "4", seccion: "B" },
+            { id: 0445, apellidos_nombres: "Pulache Palacios, Esequiel Antonio", grado: "4", seccion: "B" },
+            { id: 0446, apellidos_nombres: "Ramirez La Barrera, Cielo Dayana", grado: "4", seccion: "B" },
+            { id: 0447, apellidos_nombres: "Ramirez Sosa, Cielo Yasumi", grado: "4", seccion: "B" },
+            { id: 0448, apellidos_nombres: "Rodriguez Flores, Dayana Gissel", grado: "4", seccion: "B" },
+            { id: 0449, apellidos_nombres: "Roque Salvador, Andersson David", grado: "4", seccion: "B" },
+            { id: 0450, apellidos_nombres: "Saavedra Abad, Aaron David", grado: "4", seccion: "B" },
+            { id: 0451, apellidos_nombres: "Santos Alban, Grecia Belen", grado: "4", seccion: "B" },
+            { id: 0452, apellidos_nombres: "Viera Gutierrez, Pedro Andres", grado: "4", seccion: "B" },
+
+            { id: 0453, apellidos_nombres: "Alvarado Chimbo, Thalia Fabiana", grado: "4", seccion: "C" },
+            { id: 0454, apellidos_nombres: "Cespedes Yataco, Génesis Lilibeth", grado: "4", seccion: "C" },
+            { id: 0455, apellidos_nombres: "Chinguel Cordova, Nilton Eduardo", grado: "4", seccion: "C" },
+            { id: 0456, apellidos_nombres: "Correa Ticliahuanca, Luis Grabiel", grado: "4", seccion: "C" },
+            { id: 0457, apellidos_nombres: "Eche Correa, Samir Alexander", grado: "4", seccion: "C" },
+            { id: 0458, apellidos_nombres: "Elias Ruiz, Ana Jahaziel", grado: "4", seccion: "C" },
+            { id: 0459, apellidos_nombres: "Garcia Mondragon, Luis Arturo", grado: "4", seccion: "C" },
+            { id: 0460, apellidos_nombres: "Lopez Sanchez, Vania Lizbeth", grado: "4", seccion: "C" },
+            { id: 0461, apellidos_nombres: "Manayay Yovera, Mateo Pablo", grado: "4", seccion: "C" },
+            { id: 0462, apellidos_nombres: "Miranda Mogollon, Texeira Xiomara", grado: "4", seccion: "C" },
+            { id: 0463, apellidos_nombres: "Nima Nieves, Javier Andriuh Alexandher", grado: "4", seccion: "C" },
+            { id: 0464, apellidos_nombres: "Paucar Flores, Nina Giselle", grado: "4", seccion: "C" },
+            { id: 0465, apellidos_nombres: "Raymundo Peña, John Kenjy", grado: "4", seccion: "C" },
+            { id: 0466, apellidos_nombres: "Roman Velasquez, Jordan Del Piero", grado: "4", seccion: "C" },
+            { id: 0467, apellidos_nombres: "Romero Mondragon, Martha De Jesus", grado: "4", seccion: "C" },
+            { id: 0468, apellidos_nombres: "Saavedra Gonzales, Eliana Maytell", grado: "4", seccion: "C" },
+            { id: 0469, apellidos_nombres: "Sandoval Tocto, Brayler José", grado: "4", seccion: "C" },
+            { id: 0470, apellidos_nombres: "Seminario Pumayalla, Eduardo David", grado: "4", seccion: "C" },
+            { id: 0471, apellidos_nombres: "Silva Guevara, Lizbet Anyerli", grado: "4", seccion: "C" },
+            { id: 0472, apellidos_nombres: "Sosa Siancas, Luzmaria De Las Mercedes", grado: "4", seccion: "C" },
+            { id: 0473, apellidos_nombres: "Timana Arrunategui, Pedro Manuel Jorsix", grado: "4", seccion: "C" },
+            { id: 0474, apellidos_nombres: "Timoteo Garcia, Austin Victor", grado: "4", seccion: "C" },
+            { id: 0475, apellidos_nombres: "Tineo Mocarro, Sebastian Smit", grado: "4", seccion: "C" },
+            { id: 0476, apellidos_nombres: "Torres Bayona, Samantha Mercedes", grado: "4", seccion: "C" },
+            { id: 0477, apellidos_nombres: "Torres Chavez, Corayma", grado: "4", seccion: "C" },
+            { id: 0478, apellidos_nombres: "Velasquez Huaman, Angelo Alejandro", grado: "4", seccion: "C" },
+            { id: 0479, apellidos_nombres: "Zarate Veliz, Jhaslyn Giselle", grado: "4", seccion: "C" },
+            { id: 0480, apellidos_nombres: "Zarate Vilchez, Grehisy Emperatriz", grado: "4", seccion: "C" },
+
+            { id: 0481, apellidos_nombres: "Acosta Santisteban, Angie Nicol", grado: "4", seccion: "D" },
+            { id: 0482, apellidos_nombres: "Alburqueque Colan, Marìa Fe", grado: "4", seccion: "D" },
+            { id: 0483, apellidos_nombres: "Armijos Cordova, Allison Analia", grado: "4", seccion: "D" },
+            { id: 0484, apellidos_nombres: "Bautista Ramos, Jair Augusto", grado: "4", seccion: "D" },
+            { id: 0485, apellidos_nombres: "Campos Manchay, Jose Miguel", grado: "4", seccion: "D" },
+            { id: 0486, apellidos_nombres: "Cherres Carmen, Mayco Matias", grado: "4", seccion: "D" },
+            { id: 0487, apellidos_nombres: "Chunga Camacho, Yazury Mariandrea", grado: "4", seccion: "D" },
+            { id: 0488, apellidos_nombres: "Cordova Ramirez, Diego Janpier", grado: "4", seccion: "D" },
+            { id: 0489, apellidos_nombres: "Cruz Guerrero, Neydi Yamila", grado: "4", seccion: "D" },
+            { id: 0490, apellidos_nombres: "Cueva Jimenez, Marcos Agustin", grado: "4", seccion: "D" },
+            { id: 0491, apellidos_nombres: "Dominguez Cordova, Daleska Briggitt", grado: "4", seccion: "D" },
+            { id: 0492, apellidos_nombres: "Echevarria Valga, Jairo Emanuel", grado: "4", seccion: "D" },
+            { id: 0493, apellidos_nombres: "Elera Agurto, Segundo Isidoro", grado: "4", seccion: "D" },
+            { id: 0494, apellidos_nombres: "Garcia Chavez, Moises Alfredo", grado: "4", seccion: "D" },
+            { id: 0495, apellidos_nombres: "Garcia Zapata, Katerin Steysi", grado: "4", seccion: "D" },
+            { id: 0496, apellidos_nombres: "Gonzales Santiago, Moises Valentin", grado: "4", seccion: "D" },
+            { id: 0497, apellidos_nombres: "Gutierrez Samaniego, Johao Samir", grado: "4", seccion: "D" },
+            { id: 0498, apellidos_nombres: "Hidalgo Enrique, Angie Nicolle", grado: "4", seccion: "D" },
+            { id: 0499, apellidos_nombres: "Huancas Colan, Lucia Jazmin", grado: "4", seccion: "D" },
+            { id: 0500, apellidos_nombres: "Ipanaque Aguirre, Xiomara Abigail", grado: "4", seccion: "D" },
+            { id: 0501, apellidos_nombres: "Montero Andrade, Eduardo Alejandro", grado: "4", seccion: "D" },
+            { id: 0502, apellidos_nombres: "Ordinola Purizaca, Isaura Del Pilar", grado: "4", seccion: "D" },
+            { id: 0503, apellidos_nombres: "Palacios Ramirez, Roxana Nayumi", grado: "4", seccion: "D" },
+            { id: 0504, apellidos_nombres: "Pingo Taboada, Keren Jireth", grado: "4", seccion: "D" },
+            { id: 0505, apellidos_nombres: "Pongo Huarcaya, Jose Levi", grado: "4", seccion: "D" },
+            { id: 0506, apellidos_nombres: "Requejo Elera, Lee Michael", grado: "4", seccion: "D" },
+            { id: 0507, apellidos_nombres: "Rios Mauricio, Angelina Alessandra", grado: "4", seccion: "D" },
+            { id: 0508, apellidos_nombres: "Sarango Chunga, Saori Cielo", grado: "4", seccion: "D" },
+            { id: 0509, apellidos_nombres: "Sernaque Choquehuanca, Yerlys Fabian", grado: "4", seccion: "D" },
+            { id: 0510, apellidos_nombres: "Soto Ruidias, Dannaeth Adriana", grado: "4", seccion: "D" },
+            { id: 0511, apellidos_nombres: "Troncos Carranza, Maria Jesus", grado: "4", seccion: "D" },
+            { id: 0512, apellidos_nombres: "Yahuana Chumacero, Belinda Noelia", grado: "4", seccion: "D" },
+
+            { id: 0513, apellidos_nombres: "Aguilar Calle, Maycol Esmit", grado: "5", seccion: "A" },
+            { id: 0514, apellidos_nombres: "Ambulay Aguilar, Sneyder Edu", grado: "5", seccion: "A" },
+            { id: 0515, apellidos_nombres: "Arriola Seminario, Miguel Orlando", grado: "5", seccion: "A" },
+            { id: 0516, apellidos_nombres: "Atoche Reaño, Lesly Daniela", grado: "5", seccion: "A" },
+            { id: 0517, apellidos_nombres: "Benavides Benites, Cielo Briguitte De Los Angeles", grado: "5", seccion: "A" },
+            { id: 0518, apellidos_nombres: "Briceño Altuna, Camila Abigail", grado: "5", seccion: "A" },
+            { id: 0519, apellidos_nombres: "Castillo Deyra, Jackeline Lisbeth", grado: "5", seccion: "A" },
+            { id: 0520, apellidos_nombres: "Castro Jimenez, Jeyson Josephy", grado: "5", seccion: "A" },
+            { id: 0521, apellidos_nombres: "Cruz Abad, Rosa Anali", grado: "5", seccion: "A" },
+            { id: 0522, apellidos_nombres: "Cruz Baltazar, Jhony Ilder", grado: "5", seccion: "A" },
+            { id: 0523, apellidos_nombres: "Cruz Velasquez, Briana Lucero", grado: "5", seccion: "A" },
+            { id: 0524, apellidos_nombres: "Espinoza Leon, Marlon Eduardo", grado: "5", seccion: "A" },
+            { id: 0525, apellidos_nombres: "Fernandes Racho, Leonard Jesus", grado: "5", seccion: "A" },
+            { id: 0526, apellidos_nombres: "Flores Guevara, Otoniel Alexander", grado: "5", seccion: "A" },
+            { id: 0527, apellidos_nombres: "Garcia Calderon, Jesus Adrian", grado: "5", seccion: "A" },
+            { id: 0528, apellidos_nombres: "Garcia Garcia, Yomaira Luzbeydi", grado: "5", seccion: "A" },
+            { id: 0529, apellidos_nombres: "Gomez Garcia, Olenka Danushka", grado: "5", seccion: "A" },
+            { id: 0530, apellidos_nombres: "Guerrero Tocto, Anyeline Yoli", grado: "5", seccion: "A" },
+            { id: 0531, apellidos_nombres: "Herrera Montalban, Marylin Guadalupe", grado: "5", seccion: "A" },
+            { id: 0532, apellidos_nombres: "Huaman Valverde, Carlos Joel", grado: "5", seccion: "A" },
+            { id: 0533, apellidos_nombres: "Juarez Vega, Luania Elizabet", grado: "5", seccion: "A" },
+            { id: 0534, apellidos_nombres: "Mauricio Anton, Diego Aldhair", grado: "5", seccion: "A" },
+            { id: 0535, apellidos_nombres: "Neira Gomez, Lucero Estrella", grado: "5", seccion: "A" },
+            { id: 0536, apellidos_nombres: "Perez Huatangari, Carmen Yuliza", grado: "5", seccion: "A" },
+            { id: 0537, apellidos_nombres: "Pezo Arrunategui, Mariapaz", grado: "5", seccion: "A" },
+            { id: 0538, apellidos_nombres: "Quevedo Yajahuanca, Regina De Jesus", grado: "5", seccion: "A" },
+            { id: 0539, apellidos_nombres: "Renteria Calle, Briana Anabella", grado: "5", seccion: "A" },
+            { id: 0540, apellidos_nombres: "Reyes Adanaque, Gian Franco", grado: "5", seccion: "A" },
+            { id: 0541, apellidos_nombres: "Romero Rivera, Roit David", grado: "5", seccion: "A" },
+            { id: 0542, apellidos_nombres: "Ruiz Mechato, Robert Leonel", grado: "5", seccion: "A" },
+            { id: 0543, apellidos_nombres: "Saavedra Moran, Jesús Betzabet", grado: "5", seccion: "A" },
+            { id: 0544, apellidos_nombres: "Sernaque Choquehuanca, Anderson Javier", grado: "5", seccion: "A" },
+            { id: 0545, apellidos_nombres: "Siancas Valiente, Vitia Jokébed", grado: "5", seccion: "A" },
+            { id: 0546, apellidos_nombres: "Silva Chorres, Luciana Geraldine", grado: "5", seccion: "A" },
+            { id: 0547, apellidos_nombres: "Silva Flores, Yasmin Felipa", grado: "5", seccion: "A" },
+            { id: 0548, apellidos_nombres: "Sondor Cruz, Leslie Xiomara", grado: "5", seccion: "A" },
+            { id: 0549, apellidos_nombres: "Tello Tocto, Farid Smith", grado: "5", seccion: "A" },
+            { id: 0550, apellidos_nombres: "Tocto Maza, Mary Cielo Thais", grado: "5", seccion: "A" },
+            { id: 0551, apellidos_nombres: "Velasquez Roman, Kiara Lucero", grado: "5", seccion: "A" },
+            { id: 0552, apellidos_nombres: "Whacheng Iman, Eduardo Javier", grado: "5", seccion: "A" },
+            { id: 0553, apellidos_nombres: "Zapata Noriega, Cristian Fabiano", grado: "5", seccion: "A" },
+
+            { id: 0554, apellidos_nombres: "Alayo Gonzales, Clarita Luz", grado: "5", seccion: "B" },
+            { id: 0555, apellidos_nombres: "Arrunategui Lopez, Angel Salvador", grado: "5", seccion: "B" },
+            { id: 0556, apellidos_nombres: "Bocanegra Quispe, Jaime Daniel Antonio", grado: "5", seccion: "B" },
+            { id: 0557, apellidos_nombres: "Campoverde Rodriguez, Rodrichs", grado: "5", seccion: "B" },
+            { id: 0558, apellidos_nombres: "Carhuapoma Ruiz, Leonardo Joel", grado: "5", seccion: "B" },
+            { id: 0559, apellidos_nombres: "Carrasco Huancas, Erick Fabian", grado: "5", seccion: "B" },
+            { id: 0560, apellidos_nombres: "Carrasco Seminario, Eleyser Martin", grado: "5", seccion: "B" },
+            { id: 0561, apellidos_nombres: "Castillo Paucar, Erick Alonzo", grado: "5", seccion: "B" },
+            { id: 0562, apellidos_nombres: "Chamba Ruiz, Anyelina Yasmit", grado: "5", seccion: "B" },
+            { id: 0563, apellidos_nombres: "Chinguel Cordova, Ariana", grado: "5", seccion: "B" },
+            { id: 0564, apellidos_nombres: "Cordova Timana, Stephanie Yamilet", grado: "5", seccion: "B" },
+            { id: 0565, apellidos_nombres: "Delgado Juarez, Kathleen Isis", grado: "5", seccion: "B" },
+            { id: 0566, apellidos_nombres: "Fiestas Carrasco, Nataniel Ximena", grado: "5", seccion: "B" },
+            { id: 0567, apellidos_nombres: "Giron Barco, Luis Augusto Santiago", grado: "5", seccion: "B" },
+            { id: 0568, apellidos_nombres: "Guerrero Atocha, Dandiel Dylan", grado: "5", seccion: "B" },
+            { id: 0569, apellidos_nombres: "Inga Carranza, Cristhoper Enmanuel", grado: "5", seccion: "B" },
+            { id: 0570, apellidos_nombres: "Jimenez Quispe, Kevin David", grado: "5", seccion: "B" },
+            { id: 0571, apellidos_nombres: "Juarez Tocto, Matias Yosue", grado: "5", seccion: "B" },
+            { id: 0572, apellidos_nombres: "Julca Yaipen, Hugo Alejandro", grado: "5", seccion: "B" },
+            { id: 0573, apellidos_nombres: "La Madrid Nole, Edward Alonso", grado: "5", seccion: "B" },
+            { id: 0574, apellidos_nombres: "Livia Lazaro, Juan Carlos David", grado: "5", seccion: "B" },
+            { id: 0575, apellidos_nombres: "Lozada Carranza, Juan Emanuel", grado: "5", seccion: "B" },
+            { id: 0576, apellidos_nombres: "Lozada Cruz, Jose Anderson", grado: "5", seccion: "B" },
+            { id: 0577, apellidos_nombres: "Maldonado Huanca, Joaquin Arnaldo", grado: "5", seccion: "B" },
+            { id: 0578, apellidos_nombres: "Maza Seminario, Valeria Selene", grado: "5", seccion: "B" },
+            { id: 0579, apellidos_nombres: "Mendoza Juarez, Treyci Belen", grado: "5", seccion: "B" },
+            { id: 0580, apellidos_nombres: "Mendoza Sandoval, Zooe Luz Yessenia", grado: "5", seccion: "B" },
+            { id: 0581, apellidos_nombres: "Moretti Gonzales, Gina Brenda Celeste", grado: "5", seccion: "B" },
+            { id: 0582, apellidos_nombres: "Paz Cueva, Yanet Cristina", grado: "5", seccion: "B" },
+            { id: 0583, apellidos_nombres: "Pintado Jimenez, Roberto Carlos", grado: "5", seccion: "B" },
+            { id: 0584, apellidos_nombres: "Quispe Berru, Pablo Benjamin", grado: "5", seccion: "B" },
+            { id: 0585, apellidos_nombres: "Rimarachin Pimentel, Luisangel Nahun", grado: "5", seccion: "B" },
+            { id: 0586, apellidos_nombres: "Rivas Rumbo, Allam David", grado: "5", seccion: "B" },
+            { id: 0587, apellidos_nombres: "Rondoy Castillo, Briana Yanella", grado: "5", seccion: "B" },
+            { id: 0588, apellidos_nombres: "Rondoy Chorres, Jahir Alexander", grado: "5", seccion: "B" },
+            { id: 0589, apellidos_nombres: "Ruiz Garcia, Greisy Anely", grado: "5", seccion: "B" },
+            { id: 0590, apellidos_nombres: "Salazar Soto, Maria Julia", grado: "5", seccion: "B" },
+            { id: 0591, apellidos_nombres: "Sandoval Chiroque, Narcisa Belén", grado: "5", seccion: "B" },
+            { id: 0592, apellidos_nombres: "Sandoval Talledo, Luciana Romina", grado: "5", seccion: "B" },
+            { id: 0593, apellidos_nombres: "Uriarte Uriarte, Elvis Piero", grado: "5", seccion: "B" },
+            { id: 0594, apellidos_nombres: "Vera Borrero, Miryam Geraldine", grado: "5", seccion: "B" },
+            { id: 0595, apellidos_nombres: "Yanayaco Julca, Anyi Viviana", grado: "5", seccion: "B" },
+
+            { id: 0596, apellidos_nombres: "Abad Quito, Arnold Samuel", grado: "5", seccion: "C" },
+            { id: 0597, apellidos_nombres: "Alcantara Feijoo, Christopher Anderson", grado: "5", seccion: "C" },
+            { id: 0598, apellidos_nombres: "Ambulay Cruz, Franco Junior", grado: "5", seccion: "C" },
+            { id: 0599, apellidos_nombres: "Ancajima Torres, Carlos Daniel", grado: "5", seccion: "C" },
+            { id: 0600, apellidos_nombres: "Atoche Dominguez, Carlos Daniel", grado: "5", seccion: "C" },
+            { id: 0601, apellidos_nombres: "Avila Giron, Maria De Los Angeles", grado: "5", seccion: "C" },
+            { id: 0602, apellidos_nombres: "Bayona Chero, Manuel Eduardo", grado: "5", seccion: "C" },
+            { id: 0603, apellidos_nombres: "Camizan Neira, Jesús Israel", grado: "5", seccion: "C" },
+            { id: 0604, apellidos_nombres: "Castillo Cordova, Ana Melva", grado: "5", seccion: "C" },
+            { id: 0605, apellidos_nombres: "Cordova Castillo, Fabricio Alexander", grado: "5", seccion: "C" },
+            { id: 0606, apellidos_nombres: "Cordova Olivares, Sebastian", grado: "5", seccion: "C" },
+            { id: 0607, apellidos_nombres: "Cordova Timana, Roger Junnior", grado: "5", seccion: "C" },
+            { id: 0608, apellidos_nombres: "Dominguez Quiroz, Lenin Jhon", grado: "5", seccion: "C" },
+            { id: 0609, apellidos_nombres: "Espinoza Pasaches, Eddy Alejandro", grado: "5", seccion: "C" },
+            { id: 0610, apellidos_nombres: "Godos Ortega, Dariana Yamilet", grado: "5", seccion: "C" },
+            { id: 0611, apellidos_nombres: "Gutierrez Pintado, Oscar Samuel", grado: "5", seccion: "C" },
+            { id: 0612, apellidos_nombres: "Herrera Quito, Yumi Krisel", grado: "5", seccion: "C" },
+            { id: 0613, apellidos_nombres: "Lizana Flores, Yobany", grado: "5", seccion: "C" },
+            { id: 0614, apellidos_nombres: "Lozada Cordova, Andre Mauricio", grado: "5", seccion: "C" },
+            { id: 0615, apellidos_nombres: "Lozada Vargas, Jimmy Ronald", grado: "5", seccion: "C" },
+            { id: 0616, apellidos_nombres: "Manchay Abad, Cristhian", grado: "5", seccion: "C" },
+            { id: 0617, apellidos_nombres: "Mauricio Esteves, Brisa Antonela", grado: "5", seccion: "C" },
+            { id: 0618, apellidos_nombres: "Mulatillo Navarro, Wilson David", grado: "5", seccion: "C" },
+            { id: 0619, apellidos_nombres: "Navarro Tello, Adrian Enrique", grado: "5", seccion: "C" },
+            { id: 0620, apellidos_nombres: "Paucar Flores, Elsa Vallery Xiomara", grado: "5", seccion: "C" },
+            { id: 0621, apellidos_nombres: "Ramirez Aguilera, Brenda Nayeli", grado: "5", seccion: "C" },
+            { id: 0622, apellidos_nombres: "Ramirez Morales, Max Omar", grado: "5", seccion: "C" },
+            { id: 0623, apellidos_nombres: "Rivera Pacherres, Jhoemy Xiomara", grado: "5", seccion: "C" },
+            { id: 0624, apellidos_nombres: "Rodriguez Diaz, Luz Gabriela", grado: "5", seccion: "C" },
+            { id: 0625, apellidos_nombres: "Ruiz Pingo, Erick Josue", grado: "5", seccion: "C" },
+            { id: 0626, apellidos_nombres: "Sanchez Moreno, Adriana Belen", grado: "5", seccion: "C" },
+            { id: 0627, apellidos_nombres: "Silupu Guerrero, Ariana Yamileth", grado: "5", seccion: "C" },
+            { id: 0628, apellidos_nombres: "Suarez Jimenez, Rolwuin Wuilian Aderlyn", grado: "5", seccion: "C" },
+            { id: 0629, apellidos_nombres: "Taberoa Hurtado, Jeannys Maria", grado: "5", seccion: "C" },
+            { id: 0630, apellidos_nombres: "Toro Estrada, Joseph Alejandro", grado: "5", seccion: "C" },
+            { id: 0631, apellidos_nombres: "Umbo Garcia, Estrella De Los Angeles", grado: "5", seccion: "C" },
+            { id: 0632, apellidos_nombres: "Uriarte Carcamo, Miguel Sebastian", grado: "5", seccion: "C" },
+            { id: 0633, apellidos_nombres: "Vicente Pintado, Segundo Sebastian", grado: "5", seccion: "C" },
+            { id: 0634, apellidos_nombres: "Zeta Rodriguez, Leonardo Jesus", grado: "5", seccion: "C" },	
+			
+        ];
+
+        // Estado interno de asistencia seleccionada en la sesión actual
+        let currentAttendanceState = {};
+        let activeReportFilter = 'TODOS';
+        let attendanceChart = null;
+
+        // ==========================================
+        // INICIALIZACIÓN Y RELOJ DEL SISTEMA
+        // ==========================================
+        window.addEventListener('DOMContentLoaded', () => {
+            initClock();
+            setDefaultDate();
+            loadScriptUrl();
+            renderAttendanceTable();
+        });
+
+        function initClock() {
+            const clockEl = document.getElementById('liveClock');
+            function updateTime() {
+                const now = new Date();
+                clockEl.textContent = now.toLocaleTimeString('es-PE', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: true
+                });
+            }
+            updateTime();
+            setInterval(updateTime, 1000);
+        }
+
+        function setDefaultDate() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('inputFecha').value = today;
+        }
+
+        // Configuración persistente del URL de Google Apps Script
+        function loadScriptUrl() {
+            const savedUrl = localStorage.getItem('sanpedro_gas_url') || '';
+            document.getElementById('scriptUrlInput').value = savedUrl;
+        }
+
+        function saveScriptUrl() {
+            const url = document.getElementById('scriptUrlInput').value.trim();
+            localStorage.setItem('sanpedro_gas_url', url);
+            showModal('Configuración Guardada', 'La URL del Web App de Google Script ha sido actualizada.', 'success');
+        }
+
+        // ==========================================
+        // RENDERIZADO DINÁMICO DE TABLA Y ESTADOS
+        // ==========================================
+        function renderAttendanceTable() {
+            const grado = document.getElementById('selectGrado').value;
+            const seccion = document.getElementById('selectSeccion').value;
+            const tbody = document.getElementById('studentTableBody');
+            const emptyState = document.getElementById('emptyTableState');
+
+            // Filtrar estudiantes
+            const alumnosFiltrados = estudiantesBD.filter(a => a.grado === grado && a.seccion === seccion);
+
+            tbody.innerHTML = '';
+            currentAttendanceState = {};
+
+            if (alumnosFiltrados.length === 0) {
+                emptyState.classList.remove('hidden');
+                updateCounters();
+                renderReport();
+                return;
+            } else {
+                emptyState.classList.add('hidden');
+            }
+
+            alumnosFiltrados.forEach((alumno, index) => {
+                // Estado por defecto: "Presente"
+                currentAttendanceState[alumno.id] = 'Presente';
+
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50/80 transition-colors';
+
+                tr.innerHTML = `
+                    <td class="py-3 px-6 text-center font-medium text-slate-500">${index + 1}</td>
+                    <td class="py-3 px-6 font-semibold text-slate-900">${alumno.apellidos_nombres}</td>
+                    <td class="py-3 px-6">
+                        <div class="flex items-center justify-center space-x-2">
+                            ${createRadioOption(alumno.id, 'Presente', 'Presente', 'emerald')}
+                            ${createRadioOption(alumno.id, 'Tardanza', 'Tardanza', 'amber')}
+                            ${createRadioOption(alumno.id, 'Falta', 'Falta', 'rose')}
+                            ${createRadioOption(alumno.id, 'Justificado', 'Justif.', 'blue')}
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            updateCounters();
+            renderReport();
+        }
+
+        function createRadioOption(studentId, statusValue, labelText, color) {
+            const isChecked = statusValue === 'Presente' ? 'checked' : '';
+            return `
+                <label class="cursor-pointer inline-flex items-center px-2.5 py-1.5 rounded-lg border text-xs font-medium transition-all hover:bg-slate-100 ${color}-radio-box">
+                    <input type="radio" 
+                           name="attendance_${studentId}" 
+                           value="${statusValue}" 
+                           ${isChecked} 
+                           onchange="updateStudentStatus(${studentId}, '${statusValue}')"
+                           class="w-3.5 h-3.5 text-${color}-600 focus:ring-${color}-500 focus:ring-1">
+                    <span class="ml-1.5 text-slate-700">${labelText}</span>
+                </label>
+            `;
+        }
+
+        function updateStudentStatus(studentId, newStatus) {
+            currentAttendanceState[studentId] = newStatus;
+            updateCounters();
+            renderReport();
+        }
+
+        function setBulkStatus(status) {
+            const grado = document.getElementById('selectGrado').value;
+            const seccion = document.getElementById('selectSeccion').value;
+            const alumnosFiltrados = estudiantesBD.filter(a => a.grado === grado && a.seccion === seccion);
+
+            alumnosFiltrados.forEach(alumno => {
+                currentAttendanceState[alumno.id] = status;
+                const radios = document.getElementsByName(`attendance_${alumno.id}`);
+                radios.forEach(r => {
+                    if (r.value === status) r.checked = true;
+                });
+            });
+
+            updateCounters();
+            renderReport();
+        }
+
+        // ==========================================
+        // CÁLCULO DE MÉTRICAS Y CONTADORES
+        // ==========================================
+        function updateCounters() {
+            const values = Object.values(currentAttendanceState);
+            const presente = values.filter(v => v === 'Presente').length;
+            const tardanza = values.filter(v => v === 'Tardanza').length;
+            const falta = values.filter(v => v === 'Falta').length;
+            const justificado = values.filter(v => v === 'Justificado').length;
+
+            document.getElementById('counterPresente').textContent = presente;
+            document.getElementById('counterTardanza').textContent = tardanza;
+            document.getElementById('counterFalta').textContent = falta;
+            document.getElementById('counterJustificado').textContent = justificado;
+        }
+
+        // ==========================================
+        // MÓDULO DE REPORTES Y ESTADÍSTICAS
+        // ==========================================
+        function switchTab(tab) {
+            const regTab = document.getElementById('registerTab');
+            const repTab = document.getElementById('reportTab');
+            const regBtn = document.getElementById('tabRegisterBtn');
+            const repBtn = document.getElementById('tabReportBtn');
+
+            if (tab === 'register') {
+                regTab.classList.remove('hidden');
+                repTab.classList.add('hidden');
+                regBtn.className = 'flex-1 md:flex-none inline-flex items-center justify-center px-5 py-2.5 rounded-xl font-medium text-sm transition-all shadow-sm bg-sanpedro-700 text-white hover:bg-sanpedro-800';
+                repBtn.className = 'flex-1 md:flex-none inline-flex items-center justify-center px-5 py-2.5 rounded-xl font-medium text-sm transition-all text-slate-600 hover:bg-slate-100';
+            } else {
+                regTab.classList.add('hidden');
+                repTab.classList.remove('hidden');
+                repBtn.className = 'flex-1 md:flex-none inline-flex items-center justify-center px-5 py-2.5 rounded-xl font-medium text-sm transition-all shadow-sm bg-sanpedro-700 text-white hover:bg-sanpedro-800';
+                regBtn.className = 'flex-1 md:flex-none inline-flex items-center justify-center px-5 py-2.5 rounded-xl font-medium text-sm transition-all text-slate-600 hover:bg-slate-100';
+                renderReport();
+            }
+        }
+
+        function renderReport() {
+            const grado = document.getElementById('selectGrado').value;
+            const seccion = document.getElementById('selectSeccion').value;
+            const alumnosFiltrados = estudiantesBD.filter(a => a.grado === grado && a.seccion === seccion);
+            
+            const total = alumnosFiltrados.length;
+            const values = Object.values(currentAttendanceState);
+            const presente = values.filter(v => v === 'Presente').length;
+            const tardanza = values.filter(v => v === 'Tardanza').length;
+            const falta = values.filter(v => v === 'Falta').length;
+            const justificado = values.filter(v => v === 'Justificado').length;
+
+            const percentage = total > 0 ? Math.round((presente / total) * 100) : 0;
+
+            document.getElementById('reportTotal').textContent = total;
+            document.getElementById('reportPercentage').textContent = `${percentage}%`;
+            document.getElementById('reportTardanza').textContent = tardanza;
+            document.getElementById('reportFalta').textContent = falta;
+
+            // Actualización del Gráfico Estadístico y Porcentajes
+            updateAttendanceChart(total, presente, tardanza, falta, justificado);
+
+            const reportTbody = document.getElementById('reportTableBody');
+            reportTbody.innerHTML = '';
+
+            alumnosFiltrados.forEach(alumno => {
+                const status = currentAttendanceState[alumno.id] || 'Presente';
+                
+                if (activeReportFilter !== 'TODOS' && status !== activeReportFilter) return;
+
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50/50';
+
+                let statusBadge = '';
+                switch (status) {
+                    case 'Presente': statusBadge = '<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-semibold text-xs">Presente</span>'; break;
+                    case 'Tardanza': statusBadge = '<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-semibold text-xs">Tardanza</span>'; break;
+                    case 'Falta': statusBadge = '<span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 font-semibold text-xs">Falta</span>'; break;
+                    case 'Justificado': statusBadge = '<span class="px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 font-semibold text-xs">Justificado</span>'; break;
+                }
+
+                tr.innerHTML = `
+                    <td class="py-2.5 px-4 font-medium text-slate-900">${alumno.apellidos_nombres}</td>
+                    <td class="py-2.5 px-4 text-slate-500">${alumno.grado}° - ${alumno.seccion}</td>
+                    <td class="py-2.5 px-4">${statusBadge}</td>
+                `;
+                reportTbody.appendChild(tr);
+            });
+        }
+
+        function filterReport(filter) {
+            activeReportFilter = filter;
+            renderReport();
+        }
+
+        function updateAttendanceChart(total, presente, tardanza, falta, justificado) {
+            const ctx = document.getElementById('attendanceChart');
+            if (!ctx) return;
+
+            const calcPct = (val) => total > 0 ? ((val / total) * 100).toFixed(1) : '0.0';
+
+            const pctPresente = calcPct(presente);
+            const pctTardanza = calcPct(tardanza);
+            const pctFalta = calcPct(falta);
+            const pctJustificado = calcPct(justificado);
+
+            const listContainer = document.getElementById('chartPercentageList');
+            if (listContainer) {
+                listContainer.innerHTML = `
+                    <div class="flex items-center justify-between p-3 bg-white rounded-xl border border-emerald-200 shadow-sm">
+                        <div class="flex items-center space-x-2">
+                            <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+                            <span class="text-xs font-semibold text-slate-700">Presentes</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-sm font-bold text-emerald-700">${pctPresente}%</span>
+                            <span class="text-xs text-slate-400 block font-medium">(${presente} de ${total})</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-white rounded-xl border border-amber-200 shadow-sm">
+                        <div class="flex items-center space-x-2">
+                            <span class="w-3 h-3 rounded-full bg-amber-500"></span>
+                            <span class="text-xs font-semibold text-slate-700">Tardanzas</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-sm font-bold text-amber-700">${pctTardanza}%</span>
+                            <span class="text-xs text-slate-400 block font-medium">(${tardanza} de ${total})</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-white rounded-xl border border-rose-200 shadow-sm">
+                        <div class="flex items-center space-x-2">
+                            <span class="w-3 h-3 rounded-full bg-rose-500"></span>
+                            <span class="text-xs font-semibold text-slate-700">Faltas</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-sm font-bold text-rose-700">${pctFalta}%</span>
+                            <span class="text-xs text-slate-400 block font-medium">(${falta} de ${total})</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-white rounded-xl border border-blue-200 shadow-sm">
+                        <div class="flex items-center space-x-2">
+                            <span class="w-3 h-3 rounded-full bg-blue-500"></span>
+                            <span class="text-xs font-semibold text-slate-700">Justificados</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-sm font-bold text-blue-700">${pctJustificado}%</span>
+                            <span class="text-xs text-slate-400 block font-medium">(${justificado} de ${total})</span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (attendanceChart) {
+                attendanceChart.destroy();
+            }
+
+            const dataValues = total === 0 ? [0, 0, 0, 0] : [presente, tardanza, falta, justificado];
+
+            attendanceChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Presentes', 'Tardanzas', 'Faltas', 'Justificados'],
+                    datasets: [{
+                        data: dataValues,
+                        backgroundColor: ['#10b981', '#f59e0b', '#f43f5e', '#3b82f6'],
+                        borderWidth: 3,
+                        borderColor: '#ffffff',
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const val = context.raw || 0;
+                                    const pct = total > 0 ? ((val / total) * 100).toFixed(1) : 0;
+                                    return ` ${context.label}: ${val} (${pct}%)`;
+                                }
+                            }
+                        }
+                    },
+                    cutout: '68%'
+                }
+            });
+        }
+
+        function exportToCSV() {
+            const fecha = document.getElementById('inputFecha').value;
+            const grado = document.getElementById('selectGrado').value;
+            const seccion = document.getElementById('selectSeccion').value;
+            const alumnosFiltrados = estudiantesBD.filter(a => a.grado === grado && a.seccion === seccion);
+
+            if (alumnosFiltrados.length === 0) {
+                showModal('Atención', 'No hay datos para exportar.', 'warning');
+                return;
+            }
+
+            let csvContent = "data:text/csv;charset=utf-8,Fecha,Grado,Seccion,Estudiante,Estado\n";
+            alumnosFiltrados.forEach(alumno => {
+                const status = currentAttendanceState[alumno.id] || 'Presente';
+                csvContent += `"${fecha}","${grado}°","${seccion}","${alumno.apellidos_nombres}","${status}"\n`;
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `Asistencia_${grado}${seccion}_${fecha}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // ==========================================
+        // CONEXIÓN CON GOOGLE APPS SCRIPT (doPost)
+        // ==========================================
+        async function submitAttendance() {
+            const scriptUrl = localStorage.getItem('sanpedro_gas_url') || document.getElementById('scriptUrlInput').value.trim();
+
+            if (!scriptUrl) {
+                showModal('URL Requerida', 'Por favor ingresa y guarda la URL del Web App de Google Apps Script en la parte superior.', 'warning');
+                return;
+            }
+
+            const fecha = document.getElementById('inputFecha').value;
+            const grado = document.getElementById('selectGrado').value;
+            const seccion = document.getElementById('selectSeccion').value;
+
+            if (!fecha) {
+                showModal('Fecha Inválida', 'Por favor selecciona una fecha válida.', 'warning');
+                return;
+            }
+
+            const alumnosFiltrados = estudiantesBD.filter(a => a.grado === grado && a.seccion === seccion);
+
+            if (alumnosFiltrados.length === 0) {
+                showModal('Sin Alumnos', 'No hay registros de alumnos para la selección dada.', 'warning');
+                return;
+            }
+
+            // Mapear los registros
+            const registros = alumnosFiltrados.map(alumno => ({
+                fecha: fecha,
+                grado: `${grado}°`,
+                seccion: seccion,
+                estudiante: alumno.apellidos_nombres,
+                estado: currentAttendanceState[alumno.id] || 'Presente'
+            }));
+
+            const saveBtn = document.getElementById('saveBtn');
+            const originalBtnContent = saveBtn.innerHTML;
+
+            // Estado de carga
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = `
+                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Guardando registros...</span>
+            `;
+
+            try {
+                // Envío HTTP POST utilizando JSON
+                const response = await fetch(scriptUrl, {
+                    method: 'POST',
+                    mode: 'no-cors', // Importante para peticiones directas a Apps Script
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ asistencia: registros })
+                });
+
+                // Debido a mode: 'no-cors', no se puede inspeccionar el status code HTTP, pero el fetch completado implica éxito
+                showModal(
+                    '¡Asistencia Guardada!',
+                    `Se enviaron correctamente ${registros.length} registros de asistencia para el ${grado}° "${seccion}" en la fecha ${fecha} a Google Sheets.`,
+                    'success'
+                );
+
+            } catch (error) {
+                console.error('Error al enviar la asistencia:', error);
+                showModal(
+                    'Error de Conexión',
+                    'Ocurrió un inconveniente al comunicarse con Google Sheets. Verifica la URL de Google Script y tu conexión a Internet.',
+                    'error'
+                );
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = originalBtnContent;
+            }
+        }
+
+        // MÓDULO DE MODAL Y ALERTAS UI
+        function showModal(title, message, type = 'info') {
+            const modal = document.getElementById('statusModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalMessage = document.getElementById('modalMessage');
+            const iconContainer = document.getElementById('modalIconContainer');
+
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+
+            if (type === 'success') {
+                iconContainer.className = 'w-16 h-16 mx-auto rounded-full flex items-center justify-center bg-emerald-100 text-emerald-600';
+                iconContainer.innerHTML = `<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`;
+            } else if (type === 'warning') {
+                iconContainer.className = 'w-16 h-16 mx-auto rounded-full flex items-center justify-center bg-amber-100 text-amber-600';
+                iconContainer.innerHTML = `<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>`;
+            } else if (type === 'error') {
+                iconContainer.className = 'w-16 h-16 mx-auto rounded-full flex items-center justify-center bg-rose-100 text-rose-600';
+                iconContainer.innerHTML = `<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>`;
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('statusModal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
